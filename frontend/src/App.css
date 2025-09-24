@@ -1,0 +1,13 @@
+/* App-level styles (keeps a few sane defaults) */
+/* This file exists so `import './App.css'` in App.jsx resolves during build. */
+
+:root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optional: small container tweak */
+.app-container {
+  min-height: 100vh;
+}
+

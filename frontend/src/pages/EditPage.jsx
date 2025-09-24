@@ -29,7 +29,7 @@ const EditPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/notes/${id}, note`);
+      await api.put(`/notes/${id}`, note);
       toast.success('Note updated successfully');
       navigate(`/notes/${id}`);
     } catch (error) {
@@ -78,7 +78,7 @@ const EditPage = () => {
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-primary"
               onClick={() => navigate(-1)}
             >
               Cancel
