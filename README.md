@@ -57,18 +57,6 @@ Make sure you have the following installed:
    # Create .env file in backend directory
    touch .env
    ```
-   
-   Add the following to your `.env` file:
-   ```env
-   MONGODB_URI=mongodb://localhost:27017/notes-app
-   PORT=5000
-   ```
-   
-   For MongoDB Atlas, use:
-   ```env
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/notes-app
-   PORT=5000
-   ```
 
 4. **Frontend Setup**
    ```bash
