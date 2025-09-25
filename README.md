@@ -2,7 +2,7 @@
 ![Project Status](https://img.shields.io/badge/Status-Prototype-blue)
 ![License](https://img.shields.io/badge/License-Educational%20Use-orange)
 
-A full-stack notes application built by **Team Jakwelin** for efficient note-taking and organization.
+A full-stack notes application built by **Team JKWELEYN** for efficient note-taking and organization.
 
 <img width="1923" height="873" alt="image" src="https://github.com/user-attachments/assets/c5899763-284c-46d8-bbea-1da1bd4e9022" />
 
@@ -115,4 +115,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Made with ❤️ by Team Jakwelin
+Made with ❤️ by Team JKWELEYN
