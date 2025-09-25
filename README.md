@@ -4,7 +4,8 @@
 
 A full-stack notes application built by **Team Jakwelin** for efficient note-taking and organization.
 
-<img width="1401" height="711" alt="image" src="https://github.com/user-attachments/assets/4af17ebb-ae20-4382-8d42-a98fac7175e1" />
+<img width="1923" height="873" alt="image" src="https://github.com/user-attachments/assets/c5899763-284c-46d8-bbea-1da1bd4e9022" />
+
 
 ## 🚀 Features
 
