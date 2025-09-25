@@ -1,4 +1,4 @@
-# 📝 Notes App - Team Jakwelin
+# 📝 Notes App - Team JKWELEYN
 ![Project Status](https://img.shields.io/badge/Status-Prototype-blue)
 ![License](https://img.shields.io/badge/License-Educational%20Use-orange)
 
