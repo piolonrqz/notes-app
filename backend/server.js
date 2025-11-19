@@ -1,31 +1,27 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 
-import notesRoutes from "./Routes/notesRoutes.js";
 import { connectDB } from "./config/db.js";
-import rateLimiter from './middleware/rateLimiter.js';
-
+import notesRoutes from "./routes/notesRoutes.js";
+import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 
 dotenv.config();
-const PORT = process.env.PORT || 5001;
+
 const app = express();
+app.use(express.json());
 
-//midlleware
-app.use(
-    cors({
-        origin:"http://localhost:5173",
-    })
-);
-app.use(express.json()); // this middleware will parse json bodies: req.body
-app.use(rateLimiter);
+// Connect DB
+connectDB();
 
+// Swagger UI endpoint
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Routes
 app.use("/api/notes", notesRoutes);
 
+const PORT = process.env.PORT || 5001;
 
-connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log("Server is running on PORT: ", PORT);
-    });
-})
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Swagger Docs: http://localhost:${PORT}/api-docs`);
+});
