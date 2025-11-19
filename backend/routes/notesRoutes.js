@@ -1,27 +1,54 @@
+// routes/notesRoutes.js
+
 import express from "express";
-import Note from "../models/Note.js";
+import {
+  createNote,
+  getAllNotes,
+  getNoteById,
+  updateNote,
+  deleteNote,
+  searchNotes,
+  getArchivedNotes
+} from "../Controller/notesController.js";
+import { 
+  validateWalletAddress, 
+  validateTxHash 
+} from "../middleware/walletAuth.js";
 
 const router = express.Router();
+
+// Apply wallet validation to all routes
+router.use(validateWalletAddress);
 
 /**
  * @swagger
  * tags:
  *   name: Notes
- *   description: Notes API
+ *   description: Notes API with Cardano blockchain integration
  */
 
 /**
  * @swagger
  * /api/notes:
  *   post:
- *     summary: Create a new note
+ *     summary: Create a new note (requires blockchain transaction)
  *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cardano wallet address
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - noteId
+ *               - txHash
  *             properties:
  *               noteId:
  *                 type: string
@@ -31,45 +58,71 @@ const router = express.Router();
  *                 type: string
  *               txHash:
  *                 type: string
- *               operation:
- *                 type: string
+ *                 description: Cardano transaction hash
  *     responses:
  *       201:
- *         description: Note created
+ *         description: Note created successfully
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Wallet authentication required
  */
-router.post("/", async (req, res) => {
-  try {
-    const { noteId, title, content, txHash, operation } = req.body;
-
-    const note = new Note({
-      noteId,
-      title,
-      content,
-      transactionHistory: [{ operation, txHash }],
-    });
-
-    await note.save();
-    res.status(201).json({ ok: true, note });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
+router.post("/", validateTxHash, createNote);
 
 /**
  * @swagger
  * /api/notes:
  *   get:
- *     summary: Get all notes
+ *     summary: Get all notes for connected wallet
  *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of notes
  */
-router.get("/", async (req, res) => {
-  try {
-    const notes = await Note.find({ archived: false }).sort({ createdAt: -1 });
-    res.json({ ok: true, notes });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
+router.get("/", getAllNotes);
+
+/**
+ * @swagger
+ * /api/notes/search:
+ *   get:
+ *     summary: Search notes (local operation, no blockchain)
+ *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
+router.get("/search", searchNotes);
+
+/**
+ * @swagger
+ * /api/notes/archived:
+ *   get:
+ *     summary: Get archived notes
+ *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: List of archived notes
+ */
+router.get("/archived", getArchivedNotes);
 
 /**
  * @swagger
@@ -77,90 +130,93 @@ router.get("/", async (req, res) => {
  *   get:
  *     summary: Get a single note
  *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Note details
+ *       404:
+ *         description: Note not found
  */
-router.get("/:noteId", async (req, res) => {
-  try {
-    const { noteId } = req.params;
-    const note = await Note.findOne({ noteId, archived: false });
-    
-    if (!note) {
-      return res.status(404).json({ ok: false, error: "Note not found" });
-    }
-    
-    res.json({ ok: true, note });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
+router.get("/:noteId", getNoteById);
 
 /**
  * @swagger
  * /api/notes/{noteId}:
  *   put:
- *     summary: Update a note
+ *     summary: Update a note (requires blockchain transaction)
  *     tags: [Notes]
  *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
  *       - in: path
  *         name: noteId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: Note ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - txHash
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               txHash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Note updated
+ *       404:
+ *         description: Note not found
  */
-router.put("/:noteId", async (req, res) => {
-  try {
-    const { noteId } = req.params;
-    const { title, content, txHash, operation } = req.body;
-
-    const note = await Note.findOneAndUpdate(
-      { noteId },
-      {
-        title,
-        content,
-        $push: { transactionHistory: { operation, txHash } },
-        updatedAt: new Date(),
-      },
-      { new: true }
-    );
-
-    if (!note)
-      return res.status(404).json({ ok: false, error: "Note not found" });
-
-    res.json({ ok: true, note });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
+router.put("/:noteId", validateTxHash, updateNote);
 
 /**
  * @swagger
  * /api/notes/{noteId}:
  *   delete:
- *     summary: Archive/Delete a note
+ *     summary: Delete/Archive a note (requires blockchain transaction)
  *     tags: [Notes]
+ *     parameters:
+ *       - in: header
+ *         name: x-wallet-address
+ *         required: true
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - txHash
+ *             properties:
+ *               txHash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Note deleted
+ *       404:
+ *         description: Note not found
  */
-router.delete("/:noteId", async (req, res) => {
-  try {
-    const { noteId } = req.params;
-    const { txHash, operation } = req.body;
-
-    const note = await Note.findOneAndUpdate(
-      { noteId },
-      {
-        archived: true,
-        $push: { transactionHistory: { operation, txHash } },
-        updatedAt: new Date(),
-      },
-      { new: true }
-    );
-
-    if (!note)
-      return res.status(404).json({ ok: false, error: "Note not found" });
-
-    res.json({ ok: true, note });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
+router.delete("/:noteId", validateTxHash, deleteNote);
 
 export default router;
