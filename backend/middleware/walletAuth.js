@@ -6,63 +6,57 @@
  */
 
 export const validateWalletAddress = (req, res, next) => {
-    const walletAddress = req.headers['x-wallet-address'];
-
-    if (!walletAddress) {
-        return res.status(401).json({
-            ok: false,
-            error: 'Wallet address required'
-        });
-    }
-
-    // Basic Cardano address validation (starts with addr1)
-    if (!walletAddress.startsWith('addr1')) {
-        return res.status(400).json({
-            ok: false,
-            error: 'Invalid Cardano wallet address'
-        });
-    }
-
-    req.walletAddress = walletAddress;
-    next();
+  // Development mode bypass
+  if (process.env.NODE_ENV === 'development' && !req.headers['x-wallet-address']) {
+    console.warn('⚠️ Development mode: Using dummy wallet');
+    req.walletAddress = 'dev_wallet_' + Date.now();
+    return next();
+  }
+  
+  const walletAddress = req.headers['x-wallet-address'];
+  
+  if (!walletAddress) {
+    return res.status(401).json({ 
+      ok: false, 
+      error: 'Wallet address required. Please connect your wallet.' 
+    });
+  }
+  
+  // Allow dev addresses
+  if (!walletAddress.startsWith('addr1') && !walletAddress.startsWith('addr1_dev_')) {
+    return res.status(400).json({ 
+      ok: false, 
+      error: 'Invalid Cardano wallet address' 
+    });
+  }
+  
+  req.walletAddress = walletAddress;
+  next();
 };
 
-/**
- * Validate transaction hash in request
- * Used for CREATE, UPDATE, DELETE operations
- */
 export const validateTxHash = (req, res, next) => {
-    const { txHash } = req.body;
-
-    if (!txHash) {
-        return res.status(400).json({
-            ok: false,
-            error: 'Transaction hash required for this operation'
-        });
-    }
-
-    // Validate tx hash format (64 hex characters)
-    if (!/^[a-f0-9]{64}$/i.test(txHash)) {
-        return res.status(400).json({
-            ok: false,
-            error: 'Invalid transaction hash format'
-        });
-    }
-
-    next();
-};
-
-/**
- * Optional: Rate limiting per wallet address
- */
-export const walletRateLimit = (req, res, next) => {
-    // This could be extended to implement per-wallet rate limiting
-    // For now, we'll just use the existing rate limiter
-    next();
-};
-
-export default {
-    validateWalletAddress,
-    validateTxHash,
-    walletRateLimit
+  // Development mode bypass
+  if (process.env.NODE_ENV === 'development' && !req.body.txHash) {
+    req.body.txHash = `dev_tx_${Date.now()}`;
+    return next();
+  }
+  
+  const { txHash } = req.body;
+  
+  if (!txHash) {
+    return res.status(400).json({ 
+      ok: false, 
+      error: 'Transaction hash required' 
+    });
+  }
+  
+  // Allow dev tx hashes
+  if (!/^[a-f0-9]{64}$/i.test(txHash) && !txHash.startsWith('dev_tx_')) {
+    return res.status(400).json({ 
+      ok: false, 
+      error: 'Invalid transaction hash format' 
+    });
+  }
+  
+  next();
 };
