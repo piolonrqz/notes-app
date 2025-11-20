@@ -35,10 +35,7 @@ export const createNoteTransaction = async (lucid, noteData, operation) => {
       .newTx()
       .payToAddress(walletAddress, { lovelace: 1000000n }) // Send 1 ADA to yourself
       .attachMetadata(674, metadata[674])
-      .complete({
-        // Use local UTxO selection
-        localUPLCEval: false
-      });
+      .complete();
 
     console.log('Transaction built, waiting for signature...');
     toast.loading('Please sign the transaction in Lace wallet...', { id: 'tx-sign' });
