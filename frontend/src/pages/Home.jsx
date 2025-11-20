@@ -25,6 +25,8 @@ const Home = () => {
     clearFilters
   } = useSearch(realNotes);
 
+  const displayNotes = filteredNotes;
+
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, note: null });
   const [deleting, setDeleting] = useState(false);
@@ -92,13 +94,13 @@ const Home = () => {
       <div className="px-4 py-8 mx-auto max-w-7xl md:px-8">
         {/* Demo Mode Alert */}
         {realNotes.length === 0 && !loading && (
-          <div className="mb-8 overflow-hidden shadow-xl rounded-2xl alert bg-gradient-to-r from-brand-dark via-brand-medium to-brand-light text-white border-0">
+          <div className="mb-8 overflow-hidden text-white border-0 shadow-xl rounded-2xl alert bg-gradient-to-r from-brand-dark via-brand-medium to-brand-light">
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="flex-shrink-0 w-6 h-6 stroke-current">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div>
-                <h3 className="font-bold text-lg">✨ Demo Mode - Explore the Design</h3>
+                <h3 className="text-lg font-bold">✨ Demo Mode - Explore the Design</h3>
                 <p className="text-sm text-white/90">You're viewing sample notes with the new Bento layout! Connect your wallet to create your own blockchain-verified notes.</p>
               </div>
             </div>
