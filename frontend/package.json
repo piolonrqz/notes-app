@@ -10,7 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
+    "@meshsdk/core": "^1.9.0-beta.87",
+    "@meshsdk/react": "^1.9.0-beta.87",
+=======
     "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
     "axios": "^1.12.2",
     "buffer": "^6.0.3",
     "lucid-cardano": "^0.10.11",
@@ -26,6 +31,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.8.29",
     "daisyui": "^5.5.5",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",

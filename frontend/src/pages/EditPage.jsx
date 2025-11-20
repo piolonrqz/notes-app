@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
-import api from '../lib/axios';
+import EditNote from '../components/notes/EditNote';
+import Loading from '../components/common/Loading';
+import { useWallet } from '../hooks/useWallet';
+import { useNotes } from '../hooks/useNotes';
 import toast from 'react-hot-toast';
 import { useWallet } from '../hooks/useWallet';
 import { createNoteTransaction, checkBalance } from '../utils/cardano';
@@ -11,29 +14,50 @@ import { createNoteTransaction, checkBalance } from '../utils/cardano';
 const EditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+<<<<<<< HEAD
+  const { wallet, address, connected } = useWallet();
+  const { getNote, updateNote, loading: notesLoading } = useNotes(wallet, address);
+  
+  const [note, setNote] = useState(null);
+  const [fetchLoading, setFetchLoading] = useState(true);
+=======
   const [note, setNote] = useState({ title: '', content: '', noteId: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [txStatus, setTxStatus] = useState('');
   const { lucid, connected, address } = useWallet();
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
 
   useEffect(() => {
     const fetchNote = async () => {
       try {
+<<<<<<< HEAD
+        setFetchLoading(true);
+        const data = await getNote(id);
+        setNote(data);
+=======
         const response = await api.get(`/notes/${id}`);
         const noteData = response.data.note || response.data;
         setNote(noteData);
         setLoading(false);
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
       } catch (error) {
         console.error('Error fetching note:', error);
         toast.error('Failed to load note');
         navigate('/');
+      } finally {
+        setFetchLoading(false);
       }
     };
 
     fetchNote();
-  }, [id, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
+<<<<<<< HEAD
+  const handleSubmit = async (noteId, title, content) => {
+    await updateNote(noteId, title, content);
+=======
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,12 +122,14 @@ const EditPage = () => {
     } finally {
       setSaving(false);
     }
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
   };
 
-  if (loading) {
+  if (fetchLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="min-h-screen bg-base-200">
+        <NavigationBar />
+        <Loading text="Loading note..." fullScreen />
       </div>
     );
   }
@@ -125,7 +151,46 @@ const EditPage = () => {
   return (
     <div className="min-h-screen bg-base-200">
       <NavigationBar />
+      
       <div className="max-w-4xl p-4 mx-auto">
+<<<<<<< HEAD
+        <div className="shadow-lg card bg-base-100">
+          <div className="card-body">
+            <h1 className="mb-6 text-3xl font-bold">Edit Note</h1>
+            
+            <EditNote
+              note={note}
+              onSubmit={handleSubmit}
+              loading={notesLoading}
+              walletConnected={connected}
+            />
+          </div>
+        </div>
+
+        {/* Info Alert */}
+        {connected && (
+          <div className="mt-4 alert alert-info">
+            <div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="flex-shrink-0 w-6 h-6 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              <span>
+                Updating a note will record a transaction on the Cardano blockchain.
+              </span>
+            </div>
+          </div>
+        )}
+=======
         <h1 className="mb-6 text-3xl font-bold">Edit Note</h1>
 
         {/* Transaction Status */}
@@ -199,6 +264,7 @@ const EditPage = () => {
         <div className="mt-4 text-center text-sm text-base-content/60">
           Connected: {address?.substring(0, 12)}...{address?.substring(address.length - 8)}
         </div>
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
       </div>
     </div>
   );
