@@ -10,9 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@meshsdk/core": "^1.9.0-beta.87",
     "@meshsdk/react": "^1.9.0-beta.87",
+=======
+    "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
+>>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
     "axios": "^1.12.2",
+    "buffer": "^6.0.3",
+    "lucid-cardano": "^0.10.11",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -33,6 +39,8 @@
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-wasm": "^3.5.0"
   }
 }
