@@ -1,51 +1,51 @@
-import { useContext, useCallback } from 'react';
-import { WalletContext } from '../context/WalletContext';
+import { useState, useEffect } from 'react';
 
 export const useWallet = () => {
-    const context = useContext(WalletContext);
+  const [address, setAddress] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    if (!context) {
-        throw new Error('useWallet must be used within WalletProvider');
+  // Check if wallet was previously connected
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('walletAddress');
+    if (savedAddress) {
+      setAddress(savedAddress);
+      setConnected(true);
     }
+  }, []);
 
-    const { state, connectWallet, disconnectWallet, getBalance } = context;
+  const connectWallet = async () => {
+    try {
+      setLoading(true);
+      
+      // For now, use a dummy address until Lace is integrated
+      // Later: const wallet = await BrowserWallet.enable('lace');
+      const dummyAddress = 'addr1_dev_' + Date.now();
+      
+      setAddress(dummyAddress);
+      setConnected(true);
+      localStorage.setItem('walletAddress', dummyAddress);
+      
+      return dummyAddress;
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleConnect = useCallback(async (walletName) => {
-        try {
-            await connectWallet(walletName);
-        } catch (error) {
-            console.error('Connection error:', error);
-            throw error;
-        }
-    }, [connectWallet]);
+  const disconnectWallet = () => {
+    setAddress(null);
+    setConnected(false);
+    localStorage.removeItem('walletAddress');
+  };
 
-    const handleDisconnect = useCallback(async () => {
-        try {
-            await disconnectWallet();
-        } catch (error) {
-            console.error('Disconnection error:', error);
-            throw error;
-        }
-    }, [disconnectWallet]);
-
-    const handleGetBalance = useCallback(async () => {
-        try {
-            const balance = await getBalance();
-            return balance;
-        } catch (error) {
-            console.error('Balance fetch error:', error);
-            throw error;
-        }
-    }, [getBalance]);
-
-    return {
-        isConnected: state.isConnected,
-        walletAddress: state.walletAddress,
-        balance: state.balance,
-        loading: state.loading,
-        error: state.error,
-        connectWallet: handleConnect,
-        disconnectWallet: handleDisconnect,
-        getBalance: handleGetBalance,
-    };
+  return {
+    address,
+    connected,
+    loading,
+    connectWallet,
+    disconnectWallet
+  };
 };
