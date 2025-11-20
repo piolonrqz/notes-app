@@ -22,8 +22,11 @@ export const validateWalletAddress = (req, res, next) => {
     });
   }
   
-  // Allow dev addresses
-  if (!walletAddress.startsWith('addr1') && !walletAddress.startsWith('addr1_dev_')) {
+  // Allow common Cardano address prefixes (mainnet and test/preprod) and development tokens
+  const allowedPrefixes = ['addr1', 'addr_test', 'addr_vkh', 'addr1_dev_'];
+  const isAllowed = allowedPrefixes.some(prefix => walletAddress.startsWith(prefix)) || walletAddress.startsWith('dev_wallet_');
+
+  if (!isAllowed) {
     return res.status(400).json({ 
       ok: false, 
       error: 'Invalid Cardano wallet address' 
