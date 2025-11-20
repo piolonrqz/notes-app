@@ -60,11 +60,8 @@ export const createNote = async (req, res) => {
  */
 export const getAllNotes = async (req, res) => {
   try {
-    const walletAddress = req.walletAddress;
-    
-    // Get all non-archived notes for this wallet
+    // Get ALL non-archived notes from ALL users (shared notes)
     const notes = await Note.find({ 
-      walletAddress,
       archived: false 
     }).sort({ createdAt: -1 });
     
@@ -263,10 +260,8 @@ export const searchNotes = async (req, res) => {
  */
 export const getArchivedNotes = async (req, res) => {
   try {
-    const walletAddress = req.walletAddress;
-    
+    // Get ALL archived notes from ALL users (shared notes)
     const notes = await Note.find({ 
-      walletAddress,
       archived: true 
     }).sort({ updatedAt: -1 });
     

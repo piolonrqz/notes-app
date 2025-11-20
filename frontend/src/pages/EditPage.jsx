@@ -1,5 +1,3 @@
-// src/pages/EditPage.jsx - With Blockchain Integration
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
@@ -8,7 +6,6 @@ import Loading from '../components/common/Loading';
 import { useWallet } from '../hooks/useWallet';
 import { useNotes } from '../hooks/useNotes';
 import toast from 'react-hot-toast';
-import { createNoteTransaction, checkBalance } from '../utils/cardano';
 
 const EditPage = () => {
   const { id } = useParams();
@@ -44,7 +41,7 @@ const EditPage = () => {
 
   if (fetchLoading) {
     return (
-      <div className="min-h-screen bg-base-200">
+      <div className="min-h-screen bg-background-dark">
         <NavigationBar />
         <Loading text="Loading note..." fullScreen />
       </div>
@@ -53,11 +50,11 @@ const EditPage = () => {
 
   if (!connected) {
     return (
-      <div className="min-h-screen bg-base-200">
+      <div className="min-h-screen bg-background-dark">
         <NavigationBar />
         <div className="container px-4 py-8 mx-auto text-center">
-          <h2 className="mb-4 text-2xl">Connect Wallet Required</h2>
-          <p className="text-base-content/70">
+          <h2 className="mb-4 text-2xl text-white">Connect Wallet Required</h2>
+          <p className="text-white/70">
             Please connect your wallet to edit notes
           </p>
         </div>
@@ -66,13 +63,13 @@ const EditPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-background-dark">
       <NavigationBar />
       
       <div className="max-w-4xl p-4 mx-auto">
-        <div className="shadow-lg card bg-base-100">
-          <div className="card-body">
-            <h1 className="mb-6 text-3xl font-bold">Edit Note</h1>
+        <div className="shadow-lg rounded-2xl bg-gray-800/50 backdrop-blur-md border border-white/10">
+          <div className="p-8">
+            <h1 className="mb-6 text-3xl font-bold text-white">Edit Note</h1>
             
             <EditNote
               note={note}
@@ -85,8 +82,8 @@ const EditPage = () => {
 
         {/* Info Alert */}
         {connected && (
-          <div className="mt-4 alert alert-info">
-            <div>
+          <div className="mt-4 p-4 rounded-xl bg-brand-light/20 border border-brand-light/30 text-white">
+            <div className="flex items-center gap-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
