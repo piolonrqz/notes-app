@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, WalletIcon, X } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
-import { truncateAddress } from '../../utils/cardano';
+
+/**
+ * Truncate Ethereum address for display
+ */
+const truncateAddress = (address, length = 6) => {
+  if (!address) return '';
+  return `${address.slice(0, length)}...${address.slice(-4)}`;
+};
 
 /**
  * Floating Action Buttons - Chatbot-style placement
@@ -24,7 +31,7 @@ const FloatingActions = () => {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col-reverse items-end gap-4">
+    <div className="fixed z-50 flex flex-col-reverse items-end gap-4 bottom-8 right-8">
       {/* Expanded Buttons */}
       {isExpanded && (
         <>
@@ -34,7 +41,7 @@ const FloatingActions = () => {
             className="flex items-center gap-3 px-6 py-3 font-medium text-white transition-all duration-300 shadow-2xl bg-gradient-to-r from-brand-medium to-brand-light rounded-2xl hover:shadow-brand-light/50 hover:scale-105 animate-slide-in group"
             onClick={() => setIsExpanded(false)}
           >
-            <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+            <PlusIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
             <span>New Note</span>
           </Link>
 
@@ -86,4 +93,3 @@ const FloatingActions = () => {
 };
 
 export default FloatingActions;
-

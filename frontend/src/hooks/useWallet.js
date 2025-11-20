@@ -32,6 +32,7 @@ export const useWallet = () => {
     };
 
     autoConnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const connectWallet = async () => {
@@ -139,7 +140,8 @@ export const useWallet = () => {
   };
 
   return {
-    lucid,
+    wallet: lucid,  // Changed from 'lucid' to 'wallet' for consistency
+    lucid,          // Keep lucid for backward compatibility
     address,
     connected,
     loading,

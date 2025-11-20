@@ -6,6 +6,10 @@ import { useState, useCallback, useMemo } from 'react';
  * @returns {Object} Search state and methods
  */
 export const useSearch = (notes = []) => {
+  // Accept either an array or an object that contains an array (defensive).
+  const safeNotes = Array.isArray(notes)
+    ? notes
+    : (notes && Array.isArray(notes.notes) ? notes.notes : []);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, title
   const [filterBy, setFilterBy] = useState('all'); // all, archived, active
@@ -14,9 +18,9 @@ export const useSearch = (notes = []) => {
    * Filter and search notes based on query
    */
   const filteredNotes = useMemo(() => {
-    if (!notes || notes.length === 0) return [];
+    if (!safeNotes || safeNotes.length === 0) return [];
 
-    let result = [...notes];
+    let result = [...safeNotes];
 
     // Apply search query
     if (searchQuery.trim()) {
@@ -51,7 +55,7 @@ export const useSearch = (notes = []) => {
     });
 
     return result;
-  }, [notes, searchQuery, sortBy, filterBy]);
+  }, [safeNotes, searchQuery, sortBy, filterBy]);
 
   /**
    * Update search query
