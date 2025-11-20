@@ -44,6 +44,11 @@ export const useWallet = () => {
       localStorage.setItem('walletConnected', 'true');
       localStorage.setItem('walletAddress', walletAddress);
       
+      console.log('[Wallet] Saved to localStorage:', {
+        walletConnected: localStorage.getItem('walletConnected'),
+        walletAddress: localStorage.getItem('walletAddress')
+      });
+      
       return { wallet: laceWallet, address: walletAddress };
     } catch (err) {
       console.error('Wallet connection error:', err);
