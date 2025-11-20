@@ -44,6 +44,38 @@ export const getWalletIcon = (walletName) => {
 };
 
 /**
+ * Helper function to chunk text into 64-byte segments for Cardano metadata
+ * @param {String} text - Text to chunk
+ * @param {Number} maxBytes - Maximum bytes per chunk (default 64)
+ * @returns {Array<String>} Array of chunked strings
+ */
+const chunkText = (text, maxBytes = 64) => {
+  if (!text) return [];
+  
+  const chunks = [];
+  let currentChunk = '';
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const testChunk = currentChunk + char;
+    
+    // Check if adding this character would exceed the byte limit
+    if (new Blob([testChunk]).size > maxBytes) {
+      // Save current chunk and start new one
+      if (currentChunk) chunks.push(currentChunk);
+      currentChunk = char;
+    } else {
+      currentChunk = testChunk;
+    }
+  }
+  
+  // Add the last chunk if it exists
+  if (currentChunk) chunks.push(currentChunk);
+  
+  return chunks;
+};
+
+/**
  * Create blockchain transaction for note operations
  * @param {Object} wallet - Connected MeshSDK wallet
  * @param {Object} noteData - Note data (noteId, title, content)
@@ -59,16 +91,55 @@ export const createNoteTransaction = async (wallet, noteData, operation) => {
     const addresses = await wallet.getUsedAddresses();
     const walletAddress = addresses[0];
 
+    // Create metadata array with chunked content
+    const metadataMsg = [
+      `Op: ${operation}`,
+      `ID: ${noteData.noteId || 'new'}`
+    ];
+
+    // Add title (with proper byte calculation including prefix)
+    const title = noteData.title || 'Untitled';
+    const titlePrefix = 'T: ';
+    const titleMaxBytes = 64 - new Blob([titlePrefix]).size; // 64 - 3 = 61 bytes
+    const titleChunks = chunkText(title, titleMaxBytes);
+    
+    titleChunks.forEach((chunk, index) => {
+      if (titleChunks.length > 1) {
+        const prefix = `T${index + 1}: `;
+        const maxBytes = 64 - new Blob([prefix]).size;
+        const rechunked = chunkText(chunk, maxBytes);
+        rechunked.forEach(c => metadataMsg.push(`${prefix}${c}`));
+      } else {
+        metadataMsg.push(`${titlePrefix}${chunk}`);
+      }
+    });
+
+    // Add content (limit to first 300 characters, with proper byte calculation)
+    const limitedContent = (noteData.content || '').substring(0, 300);
+    
+    limitedContent.split('').forEach((char, index) => {
+      const chunkIndex = Math.floor(index / 50); // 50 chars per chunk (conservative)
+      const prefix = `C${chunkIndex + 1}: `;
+      const currentChunk = limitedContent.substring(chunkIndex * 50, (chunkIndex + 1) * 50);
+      
+      // Only add if not already added
+      if (index % 50 === 0) {
+        const fullString = `${prefix}${currentChunk}`;
+        // Verify it's under 64 bytes
+        if (new Blob([fullString]).size <= 64) {
+          metadataMsg.push(fullString);
+        } else {
+          // If still too long, chunk more aggressively
+          const evenSmallerChunks = chunkText(currentChunk, 64 - new Blob([prefix]).size);
+          evenSmallerChunks.forEach(c => metadataMsg.push(`${prefix}${c}`));
+        }
+      }
+    });
+
     // Create metadata for blockchain
     const metadata = {
       674: {
-        msg: [
-          `Jakwelin Notes - ${operation}`,
-          `NoteID: ${noteData.noteId}`,
-          `Title: ${noteData.title?.substring(0, 50) || 'Untitled'}`,
-          `Content: ${noteData.content?.substring(0, 100) || ''}`,
-          `Timestamp: ${new Date().toISOString()}`
-        ]
+        msg: metadataMsg
       }
     };
 

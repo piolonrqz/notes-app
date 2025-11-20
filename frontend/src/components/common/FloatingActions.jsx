@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 /**
  * Floating Action Buttons - Chatbot-style placement
  */
-const FloatingActions = () => {
+const FloatingActions = ({ onNoteCreated }) => {
   const { connected, address, connectWallet, disconnectWallet, loading } = useWallet();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -38,11 +38,12 @@ const FloatingActions = () => {
   };
 
   return (
-    <>
-      <CreateNoteModal 
-        isOpen={showCreateModal} 
-        onClose={() => setShowCreateModal(false)} 
-      />
+      <>
+          <CreateNoteModal 
+            isOpen={showCreateModal} 
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={onNoteCreated}
+          />
     <div className="fixed bottom-8 right-8 z-50 flex flex-col-reverse items-end gap-4">
       {/* Expanded Buttons */}
       {isExpanded && (

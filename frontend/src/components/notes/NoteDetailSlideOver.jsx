@@ -63,9 +63,10 @@ const NoteDetailSlideOver = ({ note, isOpen, onClose, onDelete, onArchive, onUpd
     try {
       await onUpdate?.(noteId, title, content);
       setShowEditModal(false);
-      toast.success('Note updated successfully!');
+      // Toast is shown by useNotes hook
     } catch (error) {
       console.error('Update error:', error);
+      toast.error('Failed to update note');
     }
   };
 

@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 
 const Home = () => {
   const { wallet, address, connected } = useWallet();
-  const { notes: realNotes, loading, fetchNotes, deleteNote, setNotes } = useNotes(wallet, address);
+  const { notes: realNotes, loading, fetchNotes, deleteNote, updateNote, setNotes } = useNotes(wallet, address);
   
   const {
     searchQuery,
@@ -86,7 +86,24 @@ const Home = () => {
   };
 
   const handleUpdateNote = async (noteId, title, content) => {
-    // The useNotes hook handles the update
+    try {
+      // Update the note (updateNote from useNotes handles both blockchain and state)
+      await updateNote(noteId, title, content);
+      
+      // Update the selected note if it's the one being edited
+      if (selectedNote?._id === noteId) {
+        const updatedNote = realNotes.find(n => n._id === noteId);
+        if (updatedNote) {
+          setSelectedNote({ ...updatedNote, title, content });
+        }
+      }
+      
+      // Refresh to ensure we have latest data
+      await fetchNotes();
+    } catch (error) {
+      console.error('Error updating note:', error);
+      throw error;
+    }
   };
 
   const stats = {
@@ -147,7 +164,7 @@ const Home = () => {
       </div>
 
       {/* Floating Action Buttons */}
-      <FloatingActions />
+      <FloatingActions onNoteCreated={fetchNotes} />
 
       {/* Delete Confirmation Modal */}
       <DeleteNote

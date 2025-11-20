@@ -4,7 +4,7 @@ import { useWallet } from '../../hooks/useWallet';
 import { useNotes } from '../../hooks/useNotes';
 import toast from 'react-hot-toast';
 
-const CreateNoteModal = ({ isOpen, onClose }) => {
+const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
   const { wallet, address, connected } = useWallet();
   const { createNote, loading } = useNotes(wallet, address);
   
@@ -26,10 +26,15 @@ const CreateNoteModal = ({ isOpen, onClose }) => {
 
     try {
       await createNote(title, content);
+      toast.success('Note created successfully!');
       // Reset form
       setTitle('');
       setContent('');
       onClose();
+      // Call the success callback to refresh notes
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Error creating note:', error);
     }
