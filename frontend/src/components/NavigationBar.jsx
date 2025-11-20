@@ -1,88 +1,47 @@
-<<<<<<< HEAD
-import { PlusIcon, ArchiveIcon, WalletIcon } from 'lucide-react'
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useWallet } from '../hooks/useWallet'
-import { truncateAddress } from '../utils/cardano'
-=======
-import { PlusIcon } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import WalletConnect from './WalletConnect';
->>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
+import { HomeIcon, PlusCircleIcon, ArchiveIcon, Sparkles } from 'lucide-react';
 
 const NavigationBar = () => {
-  const { connected, address, connectWallet, disconnectWallet, loading } = useWallet()
-
-  const handleWalletClick = async () => {
-    if (connected) {
-      disconnectWallet()
-    } else {
-      try {
-        await connectWallet()
-      } catch (error) {
-        console.error('Wallet connection error:', error)
-      }
-    }
-  }
-
   return (
-    <header className='border-b bg-[#1B2741]/50 backdrop-blur-md border-brand-light/10'>
-      <div className='max-w-7xl p-4 mx-auto'>
-        <div className='flex items-center justify-between'>
-<<<<<<< HEAD
-          <Link to="/" className='font-mono text-3xl font-bold text-primary tracking-light hover:opacity-80'>
-            Jakwelin Notes App
+    <nav className="sticky top-0 z-40 border-b backdrop-blur-md" style={{ backgroundColor: 'rgba(27, 39, 65, 0.9)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo/Brand */}
+          <Link to="/" className="flex items-center gap-2 transition-opacity group hover:opacity-80">
+            <Sparkles className="w-6 h-6 text-brand-lighter" />
+            <span className="text-xl font-bold text-white">Jakwelin Notes</span>
           </Link>
-          
-          <div className='flex items-center gap-3'>
-            <Link to="/archived" className='btn btn-ghost btn-sm'>
-              <ArchiveIcon className='w-4 h-4 mr-2'/> 
-              <span>Archived</span>
-            </Link>
 
-            <Link to="/create" className='btn btn-sm bg-gradient-to-r from-brand-medium to-brand-light border-0 text-white hover:shadow-lg transition-all'>
-              <PlusIcon className='w-4 h-4 mr-2'/> 
-              <span>New Note</span>
-            </Link>
-
-            <button 
-              className={`btn btn-sm ${connected ? 'bg-gradient-to-r from-brand-medium to-brand-light border-0 text-white hover:shadow-lg' : 'bg-brand-lighter/20 text-brand-dark border border-brand-light/30 hover:bg-brand-lighter/30'}`}
-              onClick={handleWalletClick}
-              disabled={loading}
+          {/* Navigation Links */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all rounded-lg hover:bg-white/10"
             >
-              {loading ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Connecting...
-                </>
-              ) : connected ? (
-                <>
-                  <WalletIcon className='w-4 h-4 mr-2'/>
-                  {truncateAddress(address, 6)}
-                </>
-              ) : (
-                <>
-                  <WalletIcon className='w-4 h-4 mr-2'/>
-                  Connect Wallet
-                </>
-              )}
-            </button>
-=======
-          <h1 className='font-mono text-3xl font-bold text-primary tracking-light'>
-            Jakwelin Notes App
-          </h1>
-          <div className='flex items-center gap-4'>
-            <WalletConnect />
-            <Link to={"/create"} className='btn btn-primary'>
-              <PlusIcon className='w-5 h-5 mr-2'/> 
-              <span>New Note</span>
+              <HomeIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Home</span>
             </Link>
->>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
+            
+            <Link
+              to="/create"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all rounded-lg bg-gradient-to-br from-brand-light to-brand-lighter hover:scale-105 hover:shadow-lg"
+            >
+              <PlusCircleIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">New Note</span>
+            </Link>
+            
+            <Link
+              to="/archived"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all rounded-lg hover:bg-white/10"
+            >
+              <ArchiveIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Archived</span>
+            </Link>
           </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };
 

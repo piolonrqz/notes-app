@@ -3,6 +3,7 @@ import NoteBentoGrid from '../components/notes/NoteBentoGrid';
 import BentoHeader from '../components/common/BentoHeader';
 import BentoFilterBar from '../components/filters/BentoFilterBar';
 import FloatingActions from '../components/common/FloatingActions';
+import NoteDetailSlideOver from '../components/notes/NoteDetailSlideOver';
 import DeleteNote from '../components/notes/DeleteNote';
 import RateLimitedUI from '../components/RateLimitedUI';
 import { useWallet } from '../hooks/useWallet';
@@ -28,6 +29,8 @@ const Home = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, note: null });
   const [deleting, setDeleting] = useState(false);
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [showNoteDetail, setShowNoteDetail] = useState(false);
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -49,17 +52,7 @@ const Home = () => {
   }, []);
 
   const handleDeleteClick = (noteId) => {
-    const noteToDelete = displayNotes.find(n => n._id === noteId);
-    
-    // If using mock data, show warning
-    if (realNotes.length === 0) {
-      toast.error('This is a demo note! Connect your wallet to create and manage real notes.', {
-        duration: 4000,
-        icon: '🎭'
-      });
-      return;
-    }
-    
+    const noteToDelete = realNotes.find(n => n._id === noteId);
     setDeleteModal({ isOpen: true, note: noteToDelete });
   };
 
@@ -75,9 +68,28 @@ const Home = () => {
     }
   };
 
+  const handleNoteClick = (note) => {
+    setSelectedNote(note);
+    setShowNoteDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowNoteDetail(false);
+    setTimeout(() => setSelectedNote(null), 300); // Wait for animation
+  };
+
+  const handleDeleteFromDetail = async (noteId) => {
+    await deleteNote(noteId);
+    handleCloseDetail();
+  };
+
+  const handleUpdateNote = async (noteId, title, content) => {
+    // The useNotes hook handles the update
+  };
+
   const stats = {
-    total: displayNotes.length,
-    thisWeek: displayNotes.filter(n => {
+    total: realNotes.length,
+    thisWeek: realNotes.filter(n => {
       const noteDate = new Date(n.createdAt);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
@@ -90,21 +102,6 @@ const Home = () => {
       {isRateLimited && <RateLimitedUI />}
 
       <div className="px-4 py-8 mx-auto max-w-7xl md:px-8">
-        {/* Demo Mode Alert */}
-        {realNotes.length === 0 && !loading && (
-          <div className="mb-8 overflow-hidden shadow-xl rounded-2xl alert bg-gradient-to-r from-brand-dark via-brand-medium to-brand-light text-white border-0">
-            <div>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="flex-shrink-0 w-6 h-6 stroke-current">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <div>
-                <h3 className="font-bold text-lg">✨ Demo Mode - Explore the Design</h3>
-                <p className="text-sm text-white/90">You're viewing sample notes with the new Bento layout! Connect your wallet to create your own blockchain-verified notes.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Beautiful Header */}
         {!isRateLimited && (
           <BentoHeader 
@@ -132,6 +129,7 @@ const Home = () => {
           <NoteBentoGrid
             notes={filteredNotes}
             onDelete={handleDeleteClick}
+            onNoteClick={handleNoteClick}
           />
         )}
 
@@ -156,6 +154,19 @@ const Home = () => {
         onConfirm={handleConfirmDelete}
         note={deleteModal.note}
         loading={deleting}
+      />
+
+      {/* Note Detail Slide-Over */}
+      <NoteDetailSlideOver
+        note={selectedNote}
+        isOpen={showNoteDetail}
+        onClose={handleCloseDetail}
+        onDelete={handleDeleteFromDetail}
+        onArchive={(noteId) => {
+          toast.success('Note archived!');
+          handleCloseDetail();
+        }}
+        onUpdate={handleUpdateNote}
       />
     </div>
   );

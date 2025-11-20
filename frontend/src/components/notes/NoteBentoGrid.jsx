@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { PenSquareIcon, Trash2Icon, Clock, Calendar } from 'lucide-react';
 import { formatDate } from '../../lib/utils';
 
 /**
  * Bento Grid Layout for Notes - Aesthetic design with varying card sizes
  */
-const NoteBentoGrid = ({ notes = [], onDelete }) => {
+const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
   if (!notes || notes.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -38,11 +37,11 @@ const NoteBentoGrid = ({ notes = [], onDelete }) => {
         const isLarge = index % 6 === 0 || index % 6 === 1 || index % 6 === 5;
         
         return (
-          <Link
+          <div
             key={note._id}
-            to={`/notes/${note._id}`}
+            onClick={() => onNoteClick?.(note)}
             className={`
-              group relative overflow-hidden rounded-2xl transition-all duration-300
+              group relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer
               hover:scale-[1.02] hover:shadow-2xl hover:shadow-brand-light/20
               border border-brand-light/20
               ${getCardClass(index)}
@@ -119,7 +118,7 @@ const NoteBentoGrid = ({ notes = [], onDelete }) => {
               {/* Decorative Corner */}
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-brand-lighter/10 to-transparent rounded-bl-full"></div>
             </div>
-          </Link>
+          </div>
         );
       })}
     </div>

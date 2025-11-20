@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { PlusIcon, WalletIcon, X } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
 import { truncateAddress } from '../../utils/cardano';
+import CreateNoteModal from '../notes/CreateNoteModal';
 
 /**
  * Floating Action Buttons - Chatbot-style placement
@@ -10,6 +10,7 @@ import { truncateAddress } from '../../utils/cardano';
 const FloatingActions = () => {
   const { connected, address, connectWallet, disconnectWallet, loading } = useWallet();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const handleWalletClick = async () => {
     if (connected) {
@@ -23,20 +24,29 @@ const FloatingActions = () => {
     }
   };
 
+  const handleNewNote = () => {
+    setIsExpanded(false);
+    setShowCreateModal(true);
+  };
+
   return (
+    <>
+      <CreateNoteModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+      />
     <div className="fixed bottom-8 right-8 z-50 flex flex-col-reverse items-end gap-4">
       {/* Expanded Buttons */}
       {isExpanded && (
         <>
           {/* New Note Button */}
-          <Link
-            to="/create"
+          <button
+            onClick={handleNewNote}
             className="flex items-center gap-3 px-6 py-3 font-medium text-white transition-all duration-300 shadow-2xl bg-gradient-to-r from-brand-medium to-brand-light rounded-2xl hover:shadow-brand-light/50 hover:scale-105 animate-slide-in group"
-            onClick={() => setIsExpanded(false)}
           >
             <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
             <span>New Note</span>
-          </Link>
+          </button>
 
           {/* Wallet Button */}
           <button
@@ -82,6 +92,7 @@ const FloatingActions = () => {
         )}
       </button>
     </div>
+    </>
   );
 };
 
