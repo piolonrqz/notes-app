@@ -1,123 +1,29 @@
-import { useState, useEffect } from 'react';
+// src/hooks/useWallet.js - Simplified Lucid Integration
 
-/**
- * Custom hook for Lace wallet connection using MeshSDK
- * @returns {Object} Wallet state and methods
- */
+import { useState, useEffect } from 'react';
+import { Lucid, Emulator } from 'lucid-cardano';
+
 export const useWallet = () => {
-  const [wallet, setWallet] = useState(null);
+  const [lucid, setLucid] = useState(null);
   const [address, setAddress] = useState(null);
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /**
-   * Connect to Lace wallet
-   */
-  const connectWallet = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Dynamically import MeshSDK
-      const { BrowserWallet } = await import('@meshsdk/core');
-      
-      // Check if Lace wallet is available
-      const availableWallets = BrowserWallet.getInstalledWallets();
-      
-      if (!availableWallets.some(w => w.name === 'lace')) {
-        throw new Error('Lace wallet not found. Please install Lace wallet extension.');
-      }
-
-      // Connect to Lace
-      const laceWallet = await BrowserWallet.enable('lace');
-      
-      // Get wallet address
-      const addresses = await laceWallet.getUsedAddresses();
-      const walletAddress = addresses[0];
-
-      setWallet(laceWallet);
-      setAddress(walletAddress);
-      setConnected(true);
-      
-      // Store in localStorage for persistence
-      localStorage.setItem('walletConnected', 'true');
-      localStorage.setItem('walletAddress', walletAddress);
-      
-      return { wallet: laceWallet, address: walletAddress };
-    } catch (err) {
-      console.error('Wallet connection error:', err);
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Disconnect wallet
-   */
-  const disconnectWallet = () => {
-    setWallet(null);
-    setAddress(null);
-    setConnected(false);
-    setError(null);
-    localStorage.removeItem('walletConnected');
-    localStorage.removeItem('walletAddress');
-  };
-
-  /**
-   * Get wallet balance
-   */
-  const getBalance = async () => {
-    if (!wallet) {
-      throw new Error('Wallet not connected');
-    }
-
-    try {
-      const balance = await wallet.getBalance();
-      return balance;
-    } catch (err) {
-      console.error('Error getting balance:', err);
-      throw err;
-    }
+  // Check if Lace is installed
+  const checkLaceInstalled = () => {
+    return typeof window !== 'undefined' && window.cardano?.lace;
   };
 
   // Auto-reconnect on page load
   useEffect(() => {
     const autoConnect = async () => {
       const wasConnected = localStorage.getItem('walletConnected');
-<<<<<<< HEAD
-      if (wasConnected === 'true') {
-        try {
-          // Dynamically import MeshSDK
-          const { BrowserWallet } = await import('@meshsdk/core');
-          
-          // Check if Lace wallet is available
-          const availableWallets = BrowserWallet.getInstalledWallets();
-          
-          if (!availableWallets.some(w => w.name === 'lace')) {
-            disconnectWallet();
-            return;
-          }
-
-          // Connect to Lace
-          const laceWallet = await BrowserWallet.enable('lace');
-          
-          // Get wallet address
-          const addresses = await laceWallet.getUsedAddresses();
-          const walletAddress = addresses[0];
-
-          setWallet(laceWallet);
-          setAddress(walletAddress);
-          setConnected(true);
-=======
       const savedAddress = localStorage.getItem('walletAddress');
       
       if (wasConnected === 'true' && savedAddress && checkLaceInstalled()) {
         try {
           await connectWallet();
->>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
         } catch (error) {
           console.error('Auto-connect failed:', error);
           disconnectWallet();
@@ -126,13 +32,6 @@ export const useWallet = () => {
     };
 
     autoConnect();
-<<<<<<< HEAD
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return {
-    wallet,
-=======
   }, []);
 
   const connectWallet = async () => {
@@ -158,9 +57,11 @@ export const useWallet = () => {
 
       console.log('Lace enabled, initializing Lucid...');
 
-      // Initialize Lucid WITHOUT Blockfrost (use wallet's provider)
-      const lucidInstance = await Lucid.new(undefined, 'Preprod');
-      
+      // Initialize Lucid with Emulator provider for Preprod (no external API needed)
+      // The Emulator provides protocol parameters for transaction building
+      const emulator = new Emulator([]);
+      const lucidInstance = await Lucid.new(emulator, 'Preprod');
+
       // Select the wallet
       lucidInstance.selectWallet(api);
 
@@ -239,20 +140,13 @@ export const useWallet = () => {
 
   return {
     lucid,
->>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
     address,
     connected,
     loading,
     error,
     connectWallet,
     disconnectWallet,
-<<<<<<< HEAD
-    getBalance
-  };
-};
-=======
     getBalance,
     isLaceInstalled: checkLaceInstalled()
   };
 };
->>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
