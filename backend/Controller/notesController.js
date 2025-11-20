@@ -86,9 +86,13 @@ export const getNoteById = async (req, res) => {
   try {
     const { noteId } = req.params;
     const walletAddress = req.walletAddress;
-    
+    // Allow lookup by either custom noteId or MongoDB _id (24-hex)
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOne({ 
-      noteId, 
+      ...idQuery,
       walletAddress,
       archived: false 
     });
@@ -124,8 +128,12 @@ export const updateNote = async (req, res) => {
       });
     }
 
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOneAndUpdate(
-      { noteId, walletAddress, archived: false },
+      { ...idQuery, walletAddress, archived: false },
       {
         title,
         content,
@@ -176,8 +184,12 @@ export const deleteNote = async (req, res) => {
       });
     }
 
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOneAndUpdate(
-      { noteId, walletAddress, archived: false },
+      { ...idQuery, walletAddress, archived: false },
       {
         archived: true,
         $push: { 

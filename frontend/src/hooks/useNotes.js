@@ -22,8 +22,10 @@ export const useNotes = (wallet, address) => {
       setLoading(true);
       setError(null);
       const data = await notesService.getAllNotes(address);
-      setNotes(data);
-      return data;
+      // Backend returns { ok, notes, count }
+      const notesPayload = data?.notes ?? [];
+      setNotes(notesPayload);
+      return notesPayload;
     } catch (err) {
       setError(err.message);
       toast.error('Failed to fetch notes');
@@ -41,7 +43,8 @@ export const useNotes = (wallet, address) => {
       setLoading(true);
       setError(null);
       const data = await notesService.getNoteById(id);
-      return data;
+      // Backend returns { ok, note }
+      return data?.note ?? null;
     } catch (err) {
       setError(err.message);
       toast.error('Failed to fetch note');
@@ -80,11 +83,14 @@ export const useNotes = (wallet, address) => {
         address
       );
 
+      // Backend returns { ok, note, message }
+      const created = result?.note ?? result;
+
       // Update local state
-      setNotes(prev => [result, ...prev]);
-      
+      setNotes(prev => [created, ...prev]);
+
       toast.success('Note created successfully!', { id: 'create' });
-      return result;
+      return created;
     } catch (err) {
       setError(err.message);
       toast.error(`Failed to create note: ${err.message}`, { id: 'create' });
@@ -122,11 +128,13 @@ export const useNotes = (wallet, address) => {
         address
       );
 
+      const updated = result?.note ?? result;
+
       // Update local state
-      setNotes(prev => prev.map(note => note._id === id ? result : note));
-      
+      setNotes(prev => prev.map(note => note._id === id ? updated : note));
+
       toast.success('Note updated successfully!', { id: 'update' });
-      return result;
+      return updated;
     } catch (err) {
       setError(err.message);
       toast.error(`Failed to update note: ${err.message}`, { id: 'update' });
@@ -158,11 +166,13 @@ export const useNotes = (wallet, address) => {
       toast.loading('Transaction sent! Confirming...', { id: 'delete' });
 
       // Step 2: Delete in backend with tx hash
-      await notesService.deleteNote(id, txHash, address);
+      const result = await notesService.deleteNote(id, txHash, address);
 
-      // Update local state
+      const deleted = result?.note ?? null;
+
+      // Update local state - remove by id
       setNotes(prev => prev.filter(note => note._id !== id));
-      
+
       toast.success('Note deleted successfully!', { id: 'delete' });
     } catch (err) {
       setError(err.message);
@@ -185,9 +195,10 @@ export const useNotes = (wallet, address) => {
     try {
       setLoading(true);
       const result = await notesService.archiveNote(id, address);
+      const archived = result?.note ?? result;
       setNotes(prev => prev.filter(note => note._id !== id));
       toast.success('Note archived');
-      return result;
+      return archived;
     } catch (err) {
       setError(err.message);
       toast.error('Failed to archive note');
@@ -209,8 +220,9 @@ export const useNotes = (wallet, address) => {
     try {
       setLoading(true);
       const result = await notesService.unarchiveNote(id, address);
+      const unarchived = result?.note ?? result;
       toast.success('Note unarchived');
-      return result;
+      return unarchived;
     } catch (err) {
       setError(err.message);
       toast.error('Failed to unarchive note');

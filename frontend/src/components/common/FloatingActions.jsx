@@ -44,7 +44,7 @@ const FloatingActions = () => {
             onClick={handleNewNote}
             className="flex items-center gap-3 px-6 py-3 font-medium text-white transition-all duration-300 shadow-2xl bg-gradient-to-r from-brand-medium to-brand-light rounded-2xl hover:shadow-brand-light/50 hover:scale-105 animate-slide-in group"
           >
-            <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+            <PlusIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
             <span>New Note</span>
           </button>
 
@@ -97,4 +97,3 @@ const FloatingActions = () => {
 };
 
 export default FloatingActions;
-

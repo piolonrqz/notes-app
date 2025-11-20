@@ -1,14 +1,16 @@
 import React from 'react';
 import { ArrowLeftIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import CreateNote from '../components/notes/CreateNote';
 import { useWallet } from '../hooks/useWallet';
 import { useNotes } from '../hooks/useNotes';
+import toast from 'react-hot-toast';
 
 const CreatePage = () => {
   const { wallet, address, connected } = useWallet();
   const { createNote, loading } = useNotes(wallet, address);
+  const navigate = useNavigate();
 
   const handleSubmit = async (title, content) => {
     await createNote(title, content);

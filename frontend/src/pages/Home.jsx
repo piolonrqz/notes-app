@@ -26,6 +26,8 @@ const Home = () => {
     clearFilters
   } = useSearch(realNotes);
 
+  const displayNotes = filteredNotes;
+
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, note: null });
   const [deleting, setDeleting] = useState(false);
