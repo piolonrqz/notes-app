@@ -1,7 +1,7 @@
 // src/hooks/useWallet.js - Simplified Lucid Integration
 
 import { useState, useEffect } from 'react';
-import { Lucid } from 'lucid-cardano';
+import { Lucid, Emulator } from 'lucid-cardano';
 
 export const useWallet = () => {
   const [lucid, setLucid] = useState(null);
@@ -57,9 +57,11 @@ export const useWallet = () => {
 
       console.log('Lace enabled, initializing Lucid...');
 
-      // Initialize Lucid WITHOUT Blockfrost (use wallet's provider)
-      const lucidInstance = await Lucid.new(undefined, 'Preprod');
-      
+      // Initialize Lucid with Emulator provider for Preprod (no external API needed)
+      // The Emulator provides protocol parameters for transaction building
+      const emulator = new Emulator([]);
+      const lucidInstance = await Lucid.new(emulator, 'Preprod');
+
       // Select the wallet
       lucidInstance.selectWallet(api);
 
