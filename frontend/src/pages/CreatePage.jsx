@@ -38,7 +38,7 @@ const CreatePage = () => {
     e.preventDefault();
 
     // Check wallet connection
-    if (!connected || !wallet) {
+    if (!connected || !lucid) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -57,7 +57,7 @@ const CreatePage = () => {
 
       // Check if user has sufficient balance
       setTxStatus('Checking wallet balance...');
-      const hasSufficientBalance = await checkBalance(wallet);
+      const hasSufficientBalance = await checkBalance(lucid);
       
       if (!hasSufficientBalance) {
         throw new Error('Insufficient ADA balance. You need at least 1.5 ADA.');
@@ -66,26 +66,30 @@ const CreatePage = () => {
       // Step 1: Create blockchain transaction
       setTxStatus('Creating blockchain transaction...');
       console.log('Creating note on blockchain:', { noteId, title, content });
-      
+
       const txHash = await createNoteTransaction(
-        wallet,
+        lucid,
         { noteId, title, content },
         'CREATE'
       );
+
+      if (!txHash) {
+        throw new Error('Transaction did not return a txHash');
+      }
 
       console.log('Transaction successful! Hash:', txHash);
       setTxStatus('Transaction submitted to blockchain!');
 
       // Step 2: Save to backend with transaction hash
       setTxStatus('Saving note to database...');
-      
-      await api.post('/notes', {
-        noteId,
-        title,
-        content,
-        txHash,
-        operation: 'CREATE'
-      });
+
+      // Ensure backend receives wallet header even if localStorage isn't set
+      const payload = { noteId, title, content, txHash, operation: 'CREATE' };
+      const headers = {};
+      if (address) headers['x-wallet-address'] = address;
+
+      const res = await api.post('/notes', payload, { headers });
+      console.log('Backend response:', res?.data);
 
       toast.success('Note created and recorded on blockchain! 🎉');
       setTxStatus('');
@@ -126,21 +130,21 @@ const CreatePage = () => {
         <NavigationBar />
         <div className="container px-4 py-8 mx-auto">
           <div className="max-w-lg mx-auto">
-            <div className="text-center card bg-base-100 shadow-xl">
+            <div className="text-center shadow-xl card bg-base-100">
               <div className="card-body">
-                <h2 className="card-title justify-center mb-4">Wallet Required</h2>
-                <p className="text-base-content/70 mb-6">
+                <h2 className="justify-center mb-4 card-title">Wallet Required</h2>
+                <p className="mb-6 text-base-content/70">
                   Please connect your Lace wallet to create notes on the blockchain
                 </p>
                 <div className="alert alert-info">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 stroke-current shrink-0">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>
                     You'll need at least 1.5 ADA in your wallet to create notes
                   </span>
                 </div>
-                <div className="card-actions justify-center mt-4">
+                <div className="justify-center mt-4 card-actions">
                   <Link to="/" className="btn btn-primary">
                     Back to Home
                   </Link>
@@ -211,15 +215,15 @@ const CreatePage = () => {
               
               {/* Transaction Status */}
               {txStatus && (
-                <div className="alert alert-info mb-4">
+                <div className="mb-4 alert alert-info">
                   <span className="loading loading-spinner loading-sm"></span>
                   <span>{txStatus}</span>
                 </div>
               )}
 
               {/* Info about blockchain transaction */}
-              <div className="alert alert-warning mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <div className="mb-4 alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 stroke-current shrink-0" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span className="text-sm">
@@ -277,7 +281,7 @@ const CreatePage = () => {
           </div>
 
           {/* Wallet Info */}
-          <div className="mt-4 text-center text-sm text-base-content/60">
+          <div className="mt-4 text-sm text-center text-base-content/60">
             Connected: {address?.substring(0, 12)}...{address?.substring(address.length - 8)}
           </div>
 >>>>>>> 5cf08634cd9da1fb0ababaca4565a4bc84a594a4
