@@ -1,51 +1,134 @@
-import { useContext, useCallback } from 'react';
-import { WalletContext } from '../context/WalletContext';
+import { useState, useEffect } from 'react';
 
+/**
+ * Custom hook for Lace wallet connection using MeshSDK
+ * @returns {Object} Wallet state and methods
+ */
 export const useWallet = () => {
-    const context = useContext(WalletContext);
+  const [wallet, setWallet] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    if (!context) {
-        throw new Error('useWallet must be used within WalletProvider');
+  /**
+   * Connect to Lace wallet
+   */
+  const connectWallet = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Dynamically import MeshSDK
+      const { BrowserWallet } = await import('@meshsdk/core');
+      
+      // Check if Lace wallet is available
+      const availableWallets = BrowserWallet.getInstalledWallets();
+      
+      if (!availableWallets.some(w => w.name === 'lace')) {
+        throw new Error('Lace wallet not found. Please install Lace wallet extension.');
+      }
+
+      // Connect to Lace
+      const laceWallet = await BrowserWallet.enable('lace');
+      
+      // Get wallet address
+      const addresses = await laceWallet.getUsedAddresses();
+      const walletAddress = addresses[0];
+
+      setWallet(laceWallet);
+      setAddress(walletAddress);
+      setConnected(true);
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('walletConnected', 'true');
+      localStorage.setItem('walletAddress', walletAddress);
+      
+      return { wallet: laceWallet, address: walletAddress };
+    } catch (err) {
+      console.error('Wallet connection error:', err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Disconnect wallet
+   */
+  const disconnectWallet = () => {
+    setWallet(null);
+    setAddress(null);
+    setConnected(false);
+    setError(null);
+    localStorage.removeItem('walletConnected');
+    localStorage.removeItem('walletAddress');
+  };
+
+  /**
+   * Get wallet balance
+   */
+  const getBalance = async () => {
+    if (!wallet) {
+      throw new Error('Wallet not connected');
     }
 
-    const { state, connectWallet, disconnectWallet, getBalance } = context;
+    try {
+      const balance = await wallet.getBalance();
+      return balance;
+    } catch (err) {
+      console.error('Error getting balance:', err);
+      throw err;
+    }
+  };
 
-    const handleConnect = useCallback(async (walletName) => {
+  // Auto-reconnect on page load
+  useEffect(() => {
+    const autoConnect = async () => {
+      const wasConnected = localStorage.getItem('walletConnected');
+      if (wasConnected === 'true') {
         try {
-            await connectWallet(walletName);
-        } catch (error) {
-            console.error('Connection error:', error);
-            throw error;
-        }
-    }, [connectWallet]);
+          // Dynamically import MeshSDK
+          const { BrowserWallet } = await import('@meshsdk/core');
+          
+          // Check if Lace wallet is available
+          const availableWallets = BrowserWallet.getInstalledWallets();
+          
+          if (!availableWallets.some(w => w.name === 'lace')) {
+            disconnectWallet();
+            return;
+          }
 
-    const handleDisconnect = useCallback(async () => {
-        try {
-            await disconnectWallet();
-        } catch (error) {
-            console.error('Disconnection error:', error);
-            throw error;
-        }
-    }, [disconnectWallet]);
+          // Connect to Lace
+          const laceWallet = await BrowserWallet.enable('lace');
+          
+          // Get wallet address
+          const addresses = await laceWallet.getUsedAddresses();
+          const walletAddress = addresses[0];
 
-    const handleGetBalance = useCallback(async () => {
-        try {
-            const balance = await getBalance();
-            return balance;
+          setWallet(laceWallet);
+          setAddress(walletAddress);
+          setConnected(true);
         } catch (error) {
-            console.error('Balance fetch error:', error);
-            throw error;
+          console.error('Auto-connect failed:', error);
+          disconnectWallet();
         }
-    }, [getBalance]);
-
-    return {
-        isConnected: state.isConnected,
-        walletAddress: state.walletAddress,
-        balance: state.balance,
-        loading: state.loading,
-        error: state.error,
-        connectWallet: handleConnect,
-        disconnectWallet: handleDisconnect,
-        getBalance: handleGetBalance,
+      }
     };
+
+    autoConnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return {
+    wallet,
+    address,
+    connected,
+    loading,
+    error,
+    connectWallet,
+    disconnectWallet,
+    getBalance
+  };
 };

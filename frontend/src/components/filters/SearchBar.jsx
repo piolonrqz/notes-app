@@ -23,15 +23,15 @@ const SearchBar = ({
   return (
     <div className="relative w-full">
       <div className="relative">
-        <SearchIcon className="absolute w-5 h-5 transform -translate-y-1/2 left-3 top-1/2 text-base-content/50" />
-        
+        <SearchIcon className="absolute w-5 h-5 -translate-y-1/2 left-3 top-1/2 text-gray-400 pointer-events-none" />
         <input
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className="w-full py-2 pl-10 pr-10 transition-all border-2 rounded-lg input input-bordered focus:border-primary"
+          className="w-full py-2 pl-10 pr-10 transition-all border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-light/50 focus:shadow-lg"
+          style={{ backgroundColor: '#34426C' }}
         />
         
         {value && (

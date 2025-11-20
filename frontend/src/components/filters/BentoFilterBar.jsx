@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import SortPanel from './SortPanel';
 
 /**
  * Modern filter bar with Bento aesthetic
@@ -13,6 +14,8 @@ const BentoFilterBar = ({
   onFilterChange,
   resultsCount 
 }) => {
+  const [showSortPanel, setShowSortPanel] = useState(false);
+
   return (
     <div className="mb-8">
       {/* Search & Actions Row */}
@@ -25,7 +28,8 @@ const BentoFilterBar = ({
             placeholder="Search your notes..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full py-3 pl-12 pr-4 transition-all border-0 rounded-2xl bg-gray-800/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-light/50 focus:bg-gray-800 focus:shadow-lg backdrop-blur-sm"
+            className="w-full py-3 pl-12 pr-4 transition-all border-0 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-light/50 focus:shadow-lg"
+            style={{ backgroundColor: '#34426C' }}
           />
           {searchQuery && (
             <button
@@ -37,17 +41,30 @@ const BentoFilterBar = ({
           )}
         </div>
 
-        {/* Sort Dropdown */}
-        <select
-          value={sortBy}
-          onChange={(e) => onSortChange(e.target.value)}
-          className="px-4 py-3 border-0 rounded-2xl bg-gray-800/50 text-white focus:ring-2 focus:ring-brand-light/50 min-w-[180px] focus:shadow-lg transition-all backdrop-blur-sm"
-        >
-          <option value="newest">📅 Newest First</option>
-          <option value="oldest">🕐 Oldest First</option>
-          <option value="title">🔤 Title (A-Z)</option>
-          <option value="updated">⚡ Recently Updated</option>
-        </select>
+        {/* Sort Button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowSortPanel(!showSortPanel)}
+            className="px-4 py-3 border-0 rounded-2xl text-white hover:opacity-90 focus:ring-2 focus:ring-brand-light/50 min-w-[180px] focus:shadow-lg transition-all flex items-center justify-between"
+            style={{ backgroundColor: '#34426C' }}
+          >
+            <span>Sort & Filter</span>
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+
+          {/* Sort Panel Dropdown */}
+          {showSortPanel && (
+            <>
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setShowSortPanel(false)}
+              ></div>
+              <div className="absolute right-0 z-20 mt-2 w-64">
+                <SortPanel sortBy={sortBy} setSortBy={onSortChange} />
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Results Count Badge */}
         {resultsCount > 0 && (

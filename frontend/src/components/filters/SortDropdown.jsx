@@ -11,9 +11,9 @@ import { ArrowUpDown } from 'lucide-react';
  */
 const SortDropdown = ({ value = 'newest', onChange, disabled = false }) => {
   const sortOptions = [
-    { value: 'newest', label: 'Newest First' },
-    { value: 'oldest', label: 'Oldest First' },
-    { value: 'title', label: 'Title (A-Z)' },
+    { value: 'newest', label: 'Date - Newest First' },
+    { value: 'oldest', label: 'Date - Oldest First' },
+    { value: 'title', label: 'Title - Ascending' },
     { value: 'updated', label: 'Recently Updated' }
   ];
 
@@ -24,8 +24,7 @@ const SortDropdown = ({ value = 'newest', onChange, disabled = false }) => {
   return (
     <div className="form-control w-full">
       <label className="label">
-        <span className="label-text flex items-center gap-1">
-          <ArrowUpDown className="w-4 h-4" />
+        <span className="label-text font-medium">
           Sort By
         </span>
       </label>
