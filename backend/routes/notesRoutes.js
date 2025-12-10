@@ -1,5 +1,3 @@
-// routes/notesRoutes.js
-
 import express from "express";
 import {
   createNote,
@@ -8,12 +6,15 @@ import {
   updateNote,
   deleteNote,
   searchNotes,
-  getArchivedNotes
+  getArchivedNotes,
+  togglePin,
+  toggleStar
 } from "../Controller/notesController.js";
 import { 
   validateWalletAddress, 
   validateTxHash 
 } from "../middleware/walletAuth.js";
+import { txLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -33,57 +34,15 @@ router.use(validateWalletAddress);
  *   post:
  *     summary: Create a new note (requires blockchain transaction)
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *         schema:
- *           type: string
- *         description: Cardano wallet address
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - noteId
- *               - txHash
- *             properties:
- *               noteId:
- *                 type: string
- *               title:
- *                 type: string
- *               content:
- *                 type: string
- *               txHash:
- *                 type: string
- *                 description: Cardano transaction hash
- *     responses:
- *       201:
- *         description: Note created successfully
- *       400:
- *         description: Invalid request
- *       401:
- *         description: Wallet authentication required
  */
-router.post("/", validateTxHash, createNote);
+router.post("/", validateTxHash, txLimiter, createNote);
 
 /**
  * @swagger
  * /api/notes:
  *   get:
- *     summary: Get all notes for connected wallet
+ *     summary: Get all notes
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of notes
  */
 router.get("/", getAllNotes);
 
@@ -93,18 +52,6 @@ router.get("/", getAllNotes);
  *   get:
  *     summary: Search notes (local operation, no blockchain)
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Search results
  */
 router.get("/search", searchNotes);
 
@@ -114,13 +61,6 @@ router.get("/search", searchNotes);
  *   get:
  *     summary: Get archived notes
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *     responses:
- *       200:
- *         description: List of archived notes
  */
 router.get("/archived", getArchivedNotes);
 
@@ -130,22 +70,28 @@ router.get("/archived", getArchivedNotes);
  *   get:
  *     summary: Get a single note
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *       - in: path
- *         name: noteId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Note details
- *       404:
- *         description: Note not found
  */
 router.get("/:noteId", getNoteById);
+
+/**
+ * NEW: Toggle pin (local only, no blockchain)
+ * @swagger
+ * /api/notes/{noteId}/pin:
+ *   patch:
+ *     summary: Toggle pin status (local only, instant)
+ *     tags: [Notes]
+ */
+router.patch("/:noteId/pin", togglePin);
+
+/**
+ * NEW: Toggle star (local only, no blockchain)
+ * @swagger
+ * /api/notes/{noteId}/star:
+ *   patch:
+ *     summary: Toggle star status (local only, instant)
+ *     tags: [Notes]
+ */
+router.patch("/:noteId/star", toggleStar);
 
 /**
  * @swagger
@@ -153,37 +99,8 @@ router.get("/:noteId", getNoteById);
  *   put:
  *     summary: Update a note (requires blockchain transaction)
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *       - in: path
- *         name: noteId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - txHash
- *             properties:
- *               title:
- *                 type: string
- *               content:
- *                 type: string
- *               txHash:
- *                 type: string
- *     responses:
- *       200:
- *         description: Note updated
- *       404:
- *         description: Note not found
  */
-router.put("/:noteId", validateTxHash, updateNote);
+router.put("/:noteId", validateTxHash, txLimiter, updateNote);
 
 /**
  * @swagger
@@ -191,32 +108,7 @@ router.put("/:noteId", validateTxHash, updateNote);
  *   delete:
  *     summary: Delete/Archive a note (requires blockchain transaction)
  *     tags: [Notes]
- *     parameters:
- *       - in: header
- *         name: x-wallet-address
- *         required: true
- *       - in: path
- *         name: noteId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - txHash
- *             properties:
- *               txHash:
- *                 type: string
- *     responses:
- *       200:
- *         description: Note deleted
- *       404:
- *         description: Note not found
  */
-router.delete("/:noteId", validateTxHash, deleteNote);
+router.delete("/:noteId", validateTxHash, txLimiter, deleteNote);
 
 export default router;
