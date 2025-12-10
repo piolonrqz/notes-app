@@ -54,7 +54,6 @@ const NoteSchema = new Schema({
     type: String,
     enum: ["pending", "confirmed", "failed"],
     default: "pending",
-    index: true // Index for worker queries
   },
   
   archived: { 
