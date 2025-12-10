@@ -2,42 +2,48 @@
 ![Project Status](https://img.shields.io/badge/Status-Prototype-blue)
 ![License](https://img.shields.io/badge/License-Educational%20Use-orange)
 
-A full-stack notes application built by **Team JKWELEYN** for efficient note-taking and organization.
+A **Hybrid Web3 Notes Application** built by **Team JKWELEYN** that combines the speed of Web2 with the permanence and ownership of the Cardano blockchain.
 
-<img width="1923" height="873" alt="image" src="https://github.com/user-attachments/assets/c5899763-284c-46d8-bbea-1da1bd4e9022" />
+<img width="1906" height="902" alt="image" src="https://github.com/user-attachments/assets/8c431685-7bdb-4772-b232-9e44f4800089" />
+
 
 
 ## 🚀 Features
 
-- ✨ Create, read, update, and delete notes
-- 🔍 Search and filter notes
-- 📂 Organize notes by categories
-- 💾 Persistent storage with MongoDB
-- ⚡ Fast and intuitive user interface
+- 📂 **Standard Features** - Create, edit, delete, archive, and search/filter notes.
+- 🔐 **Zero-Knowledge Auth** - Login securely using only your Cardano Wallet (Lace/Nami).
+- ⛓️ **Blockchain Permanence** - Every note is cryptographically signed and stored on the Cardano blockchain (Preview Network).
+- ⚡ **Optimistic UI** - Instant save functionality using a local MongoDB cache while the blockchain confirms in the background.
+- 📦 **Smart Chunking** - Automatically splits long notes into 64-byte chunks to fit Cardano metadata standards.
+- 🔍 **Real-Time Sync** - Background workers verify transaction status via Blockfrost API.
 
 ## 🛠️ Tech Stack
 
+### Blockchain & Web3
+- **Cardano Preview Network** - Public ledger for note permanence.
+- **MeshSDK** - Transaction building and wallet integration.
+- **Blockfrost API** - Blockchain data verification service.
+- **CIP-30 Wallets** - Support for Lace, Nami, Eternl, etc.
+
 ### Frontend
-- **React** - User interface library
-- **React Router** - Client-side routing
-- **CSS3** - Styling and animations
-- **Vite** - Build tool and development server
+- **React (Vite)** - Fast, modern UI library.
+- **TailwindCSS** - Responsive styling.
+- **Lucide React** - Iconography.
 
 ### Backend
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web application framework
+- **Node.js & Express** - API Server.
 - **MongoDB** - NoSQL database
 - **Mongoose** - MongoDB object modeling
-
 
 ## 🚦 Getting Started
 
 ### Prerequisites
 
 Make sure you have the following installed:
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB](https://www.mongodb.com/try/download/community) or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
-- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/) (v18+)
+- [MongoDB](https://www.mongodb.com/) (Local or Atlas)
+- **Cardano Wallet** (Lace or Nami) set to **Preview Testnet**.
+- [Blockfrost](https://blockfrost.io/) Project ID (Preview Network).
 
 ### Installation
 
@@ -91,14 +97,6 @@ Make sure you have the following installed:
    Frontend will run on `http://localhost:5173`
 
 
-## 🎯 Usage
-
-1. **Creating a Note**: Click the "Create Note" button and fill in the title and content
-2. **Viewing Notes**: All notes are displayed on the homepage
-3. **Editing a Note**: Click the edit button on any note card
-4. **Deleting a Note**: Click the delete button on any note card
-5. **Searching Notes**: Use the search bar to find specific notes
-
 ## 👥 Team Jakwelin
 
 | Profile | Name                    | GitHub Username            |
@@ -112,7 +110,3 @@ Make sure you have the following installed:
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Made with ❤️ by Team JKWELEYN
