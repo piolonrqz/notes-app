@@ -1,5 +1,3 @@
-// utils/cardano.js
-
 /**
  * Cardano blockchain utilities for Notes App
  * Handles transaction creation and metadata formatting
@@ -7,28 +5,33 @@
 
 /**
  * Create metadata for note operations
- * Cardano metadata uses label-based structure
- * We'll use label 674 (standard for app metadata)
+ * Using label 42819 (not reserved, safe for custom apps)
  */
+
 export const createNoteMetadata = (operation, noteData) => {
     const { noteId, title, content } = noteData;
 
     return {
-        674: {
-            msg: [
-                `Notes App - ${operation}`,
-                `NoteID: ${noteId}`,
-                `Title: ${title?.substring(0, 50) || 'Untitled'}`, // Limit metadata size
-                `Timestamp: ${new Date().toISOString()}`
-            ]
+        42819: {
+            action: operation,
+            note_id: noteId,
+            title: title?.substring(0, 64) || 'Untitled',
+            content: content?.substring(0, 200) || '', // Preview only
+            timestamp: new Date().toISOString()
         }
     };
 };
 
-/**
- * Validate transaction hash format
- */
+// Validate transaction hash format
 export const isValidTxHash = (hash) => {
+    if (!hash) return false;
+    
+    // Allow dev mode tx hashes
+    if (process.env.NODE_ENV === 'development' && hash.startsWith('dev_tx_')) {
+        return true;
+    }
+    
+    // Real Cardano tx hash: 64 hex characters
     return /^[a-f0-9]{64}$/i.test(hash);
 };
 
@@ -81,11 +84,28 @@ export const createTxPayload = (operation, noteData, walletAddress) => {
     };
 };
 
+/**
+ * NEW: Validate Cardano wallet address
+ */
+export const isValidWalletAddress = (address) => {
+    if (!address) return false;
+    
+    // Allow dev mode addresses
+    if (process.env.NODE_ENV === 'development' && address.startsWith('dev_wallet_')) {
+        return true;
+    }
+    
+    // Real Cardano addresses start with these prefixes
+    const validPrefixes = ['addr1', 'addr_test', 'addr_vkh'];
+    return validPrefixes.some(prefix => address.startsWith(prefix));
+};
+
 export default {
     createNoteMetadata,
     isValidTxHash,
     getMinimumAda,
     formatOperation,
     parseTxResponse,
-    createTxPayload
+    createTxPayload,
+    isValidWalletAddress
 };

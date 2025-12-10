@@ -10,8 +10,16 @@ const TransactionRecordSchema = new Schema({
   },
   txHash: { 
     type: String, 
-    required: true,
-    match: /^[a-f0-9]{64}$/i // Validate tx hash format
+    required: true
+    // REMOVED strict regex - validation done in middleware instead
+  },
+  status: {
+    type: String,
+    enum: ["pending", "confirmed", "failed"],
+    default: "pending"
+  },
+  confirmedAt: {
+    type: Date
   },
   timestamp: { 
     type: Date, 
@@ -24,12 +32,12 @@ const NoteSchema = new Schema({
     type: String, 
     required: true, 
     unique: true,
-    index: true // Add index for faster queries
+    index: true
   },
   walletAddress: {
     type: String,
     required: true,
-    index: true // Add index for wallet-based queries
+    index: true
   },
   title: {
     type: String,
@@ -40,11 +48,20 @@ const NoteSchema = new Schema({
     type: String,
     default: ""
   },
+  
+  // Overall note status (for background worker)
+  status: {
+    type: String,
+    enum: ["pending", "confirmed", "failed"],
+    default: "pending",
+  },
+  
   archived: { 
     type: Boolean, 
     default: false,
-    index: true // Add index for filtering
+    index: true
   },
+  
   // Local-only features (not on blockchain)
   pinned: {
     type: Boolean,
@@ -62,15 +79,17 @@ const NoteSchema = new Schema({
     type: String,
     default: null
   },
+  
   // Blockchain transaction history
   transactionHistory: { 
     type: [TransactionRecordSchema], 
     default: [] 
   },
+  
   createdAt: { 
     type: Date, 
     default: Date.now,
-    index: true // Add index for sorting
+    index: true
   },
   updatedAt: { 
     type: Date, 
@@ -78,8 +97,9 @@ const NoteSchema = new Schema({
   }
 });
 
-// Add compound index for common queries
+// Compound indexes for common queries
 NoteSchema.index({ walletAddress: 1, archived: 1, createdAt: -1 });
+NoteSchema.index({ status: 1 }); // For background worker
 
 // Middleware to update updatedAt on save
 NoteSchema.pre('save', function(next) {
