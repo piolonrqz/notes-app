@@ -1,7 +1,7 @@
 // Cardano network configuration
-export const CARDANO_NETWORK = 'testnet';
+export const CARDANO_NETWORK = 'preview';
 
-export const SUPPORTED_WALLETS = ['lace', 'nami', 'eternl', 'begin'];
+export const SUPPORTED_WALLETS = ['lace', 'nami'];
 
 // Format lovelace to ADA
 export const formatLovelace = (lovelace) => {
@@ -37,8 +37,6 @@ export const getWalletIcon = (walletName) => {
   const icons = {
     lace: '🎯',
     nami: '🦊',
-    eternl: '♾️',
-    begin: '▶️',
   };
   return icons[walletName?.toLowerCase()] || '💼';
 };
