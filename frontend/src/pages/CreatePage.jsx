@@ -1,94 +1,73 @@
-import { ArrowLeftIcon } from 'lucide-react'
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import api from '../lib/axios'
-import NavigationBar from '../components/NavigationBar'
+import React from 'react';
+import { ArrowLeftIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import NavigationBar from '../components/NavigationBar';
+import CreateNote from '../components/notes/CreateNote';
+import { useWallet } from '../hooks/useWallet';
+import { useNotes } from '../hooks/useNotes';
+import toast from 'react-hot-toast';
 
 const CreatePage = () => {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const { wallet, address, connected } = useWallet();
+  const { createNote, loading } = useNotes(wallet, address);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!title.trim() || !content.trim()) {
-      toast.error('All fields are required')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      await api.post('/notes', { title, content })
-      toast.success('Note created successfully')
-      navigate('/')
-    } catch (error) {
-      console.log('Error in note creation', error)
-      if (error.response?.status === 429) {
-        toast.error("You're creating notes too fast", {
-          duration: 4000,
-          icon: '🤬',
-        })
-      } else {
-        toast.error('Failed to create a note')
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleSubmit = async (title, content) => {
+    await createNote(title, content);
+  };
 
   return (
     <div className="min-h-screen bg-base-200">
       <NavigationBar />
+      
       <div className="container px-4 py-8 mx-auto">
-        <div className="max-w-lg mx-auto">
-          <Link to={'/'} className="inline-flex items-center gap-2 mb-6 btn btn-ghost">
+        <div className="max-w-2xl mx-auto">
+          {/* Back Button */}
+          <Link to="/" className="inline-flex items-center gap-2 mb-6 btn btn-ghost">
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Notes
           </Link>
-          <div className="shadow-sm card card-compact bg-base-100">
-            <div className="p-4">
-              <h2 className="mb-3 text-xl font-semibold">Create New Note</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3 form-control">
-                  <label className="label">
-                    <span className="label-text">Title</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Note title"
-                    className="w-full input input-bordered"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
 
-                <div className="mb-3 form-control">
-                  <label className="label">
-                    <span className="label-text">Content</span>
-                  </label>
-
-                  <textarea
-                    placeholder="Write your note here"
-                    className="w-full mb-3 h-28 textarea textarea-bordered"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
-                  <div className="justify-end card-actions ">
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                      {loading ? 'Creating...' : 'Create Note'}
-                    </button>
-                  </div>
-                </div>
-              </form>
+          {/* Create Note Form */}
+          <div className="shadow-lg card bg-base-100">
+            <div className="card-body">
+              <h2 className="mb-4 text-2xl font-bold card-title">Create New Note</h2>
+              
+              <CreateNote
+                onSubmit={handleSubmit}
+                loading={loading}
+                walletConnected={connected}
+              />
             </div>
           </div>
+
+          {/* Info Alert */}
+          {connected && (
+            <div className="mt-4 alert alert-info">
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="flex-shrink-0 w-6 h-6 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span>
+                  Creating a note will record a transaction on the Cardano blockchain.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreatePage
+export default CreatePage;

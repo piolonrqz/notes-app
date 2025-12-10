@@ -5,6 +5,9 @@ import { connectDB } from "../config/db.js";
 import Note from "../models/Note.js";
 import { randomUUID, randomBytes } from "crypto";
 
+// Read wallet address from env (useful for dev). If not provided, use a safe test address.
+const WALLET_ADDRESS = process.env.WALLET_ADDRESS || "addr1q8fhxws5mfruxqw2jtv0gzxk7cmnx87rnsufru4ruu0323gdy0s9l0swj7w0ljf8v0g8gs8vwp9c5ldxm9regrmr9a8s9j5zgk";
+
 const makeTxHash = () => randomBytes(32).toString("hex");
 
 const sampleNotes = [

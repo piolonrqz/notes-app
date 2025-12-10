@@ -1,5 +1,3 @@
-// Controller/notesController.js
-
 import Note from "../models/Note.js";
 import { formatOperation, isValidTxHash } from "../utils/cardano.js";
 
@@ -33,10 +31,12 @@ export const createNote = async (req, res) => {
       title,
       content,
       walletAddress,
+      status: "pending",
       transactionHistory: [
         { 
           operation: formatOperation("create"), 
           txHash,
+          status: "pending",
           timestamp: new Date()
         }
       ],
@@ -47,7 +47,7 @@ export const createNote = async (req, res) => {
     res.status(201).json({ 
       ok: true, 
       note,
-      message: "Note created and recorded on blockchain"
+      message: "Note created. Transaction pending blockchain confirmation."
     });
   } catch (err) {
     console.error("Create note error:", err);
@@ -60,11 +60,7 @@ export const createNote = async (req, res) => {
  */
 export const getAllNotes = async (req, res) => {
   try {
-    const walletAddress = req.walletAddress;
-    
-    // Get all non-archived notes for this wallet
     const notes = await Note.find({ 
-      walletAddress,
       archived: false 
     }).sort({ createdAt: -1 });
     
@@ -87,8 +83,12 @@ export const getNoteById = async (req, res) => {
     const { noteId } = req.params;
     const walletAddress = req.walletAddress;
     
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOne({ 
-      noteId, 
+      ...idQuery,
       walletAddress,
       archived: false 
     });
@@ -124,15 +124,21 @@ export const updateNote = async (req, res) => {
       });
     }
 
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOneAndUpdate(
-      { noteId, walletAddress, archived: false },
+      { ...idQuery, walletAddress, archived: false },
       {
         title,
         content,
+        status: "pending",
         $push: { 
           transactionHistory: { 
             operation: formatOperation("update"), 
             txHash,
+            status: "pending",
             timestamp: new Date()
           } 
         },
@@ -151,7 +157,7 @@ export const updateNote = async (req, res) => {
     res.json({ 
       ok: true, 
       note,
-      message: "Note updated and recorded on blockchain"
+      message: "Note updated. Transaction pending blockchain confirmation."
     });
   } catch (err) {
     console.error("Update note error:", err);
@@ -176,14 +182,20 @@ export const deleteNote = async (req, res) => {
       });
     }
 
+    const idQuery = /^[a-fA-F0-9]{24}$/.test(noteId)
+      ? { $or: [{ noteId }, { _id: noteId }] }
+      : { noteId };
+
     const note = await Note.findOneAndUpdate(
-      { noteId, walletAddress, archived: false },
+      { ...idQuery, walletAddress, archived: false },
       {
         archived: true,
+        status: "pending", //
         $push: { 
           transactionHistory: { 
             operation: formatOperation("delete"), 
             txHash,
+            status: "pending", //
             timestamp: new Date()
           } 
         },
@@ -202,7 +214,7 @@ export const deleteNote = async (req, res) => {
     res.json({ 
       ok: true, 
       note,
-      message: "Note deleted and recorded on blockchain"
+      message: "Note deleted. Transaction pending blockchain confirmation."
     });
   } catch (err) {
     console.error("Delete note error:", err);
@@ -251,10 +263,7 @@ export const searchNotes = async (req, res) => {
  */
 export const getArchivedNotes = async (req, res) => {
   try {
-    const walletAddress = req.walletAddress;
-    
     const notes = await Note.find({ 
-      walletAddress,
       archived: true 
     }).sort({ updatedAt: -1 });
     
@@ -269,6 +278,68 @@ export const getArchivedNotes = async (req, res) => {
   }
 };
 
+/**
+ * ✅ NEW: Toggle pin (local only, no blockchain)
+ */
+export const togglePin = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+    const walletAddress = req.walletAddress;
+    
+    const note = await Note.findOne({ noteId, walletAddress });
+    
+    if (!note) {
+      return res.status(404).json({ 
+        ok: false, 
+        error: "Note not found" 
+      });
+    }
+    
+    note.pinned = !note.pinned;
+    await note.save();
+    
+    res.json({ 
+      ok: true, 
+      note,
+      message: `Note ${note.pinned ? 'pinned' : 'unpinned'}`
+    });
+  } catch (err) {
+    console.error("Toggle pin error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
+/**
+ * ✅ NEW: Toggle star (local only, no blockchain)
+ */
+export const toggleStar = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+    const walletAddress = req.walletAddress;
+    
+    const note = await Note.findOne({ noteId, walletAddress });
+    
+    if (!note) {
+      return res.status(404).json({ 
+        ok: false, 
+        error: "Note not found" 
+      });
+    }
+    
+    note.starred = !note.starred;
+    await note.save();
+    
+    res.json({ 
+      ok: true, 
+      note,
+      message: `Note ${note.starred ? 'starred' : 'unstarred'}`
+    });
+  } catch (err) {
+    console.error("Toggle star error:", err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+};
+
 export default {
   createNote,
   getAllNotes,
@@ -276,5 +347,7 @@ export default {
   updateNote,
   deleteNote,
   searchNotes,
-  getArchivedNotes
+  getArchivedNotes,
+  togglePin,
+  toggleStar
 };

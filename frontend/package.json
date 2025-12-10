@@ -12,12 +12,14 @@
   "dependencies": {
     "@meshsdk/core": "^1.9.0-beta.87",
     "@meshsdk/react": "^1.9.0-beta.87",
-    "axios": "^1.13.2",
+    "axios": "^1.12.2",
+    "buffer": "^6.0.3",
+    "lucid-cardano": "^0.10.11",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
-    "react-router-dom": "^7.10.1"
+    "react-router-dom": "^7.9.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -25,6 +27,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.8.29",
     "daisyui": "^5.5.5",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -32,6 +35,8 @@
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-wasm": "^3.5.0"
   }
 }
