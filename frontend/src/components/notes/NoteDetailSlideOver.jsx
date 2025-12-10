@@ -3,6 +3,7 @@ import { X, Edit2, Trash2, Archive, Calendar, Clock } from 'lucide-react';
 import { formatDate } from '../../lib/utils';
 import DeleteNote from './DeleteNote';
 import EditNoteModal from './EditNoteModal';
+import StatusBadge from '../common/StatusBadge';
 import toast from 'react-hot-toast';
 
 const NoteDetailSlideOver = ({ note, isOpen, onClose, onDelete, onArchive, onUpdate }) => {
@@ -137,7 +138,11 @@ const NoteDetailSlideOver = ({ note, isOpen, onClose, onDelete, onArchive, onUpd
 
             {/* Title */}
             <div>
-              <h1 className="text-3xl font-bold text-white mb-4">{note.title}</h1>
+              <div className="flex items-center gap-3 mb-4">
+                <h1 className="text-3xl font-bold text-white">{note.title}</h1>
+                {/* Status Badge */}
+                {note.status && <StatusBadge status={note.status} size="md" />}
+              </div>
               
               {/* Metadata */}
               <div className="flex flex-wrap gap-4 text-sm text-white/60">

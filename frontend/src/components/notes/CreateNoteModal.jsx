@@ -26,7 +26,7 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
 
     try {
       await createNote(title, content);
-      toast.success('Note created successfully!');
+      // Note: Success toast is handled by useNotes hook
       // Reset form
       setTitle('');
       setContent('');
@@ -37,6 +37,7 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
       }
     } catch (error) {
       console.error('Error creating note:', error);
+      // Error toast is already handled by useNotes hook
     }
   };
 

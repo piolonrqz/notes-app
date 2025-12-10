@@ -1,6 +1,7 @@
 import React from 'react';
 import { PenSquareIcon, Trash2Icon, Clock, Calendar } from 'lucide-react';
 import { formatDate } from '../../lib/utils';
+import StatusBadge from '../common/StatusBadge';
 
 /**
  * Bento Grid Layout for Notes - Aesthetic design with varying card sizes
@@ -66,9 +67,17 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-brand-lighter transition-colors">
-                    {note.title}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-brand-lighter transition-colors">
+                      {note.title}
+                    </h3>
+                  </div>
+                  {/* Status Badge */}
+                  {note.status && (
+                    <div className="mt-1">
+                      <StatusBadge status={note.status} size="sm" />
+                    </div>
+                  )}
                 </div>
                 
                 {/* Action Buttons */}
