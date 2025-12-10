@@ -2,7 +2,7 @@
 import 'dotenv/config'; 
 
 import Note from "../models/Note.js";
-import blockfrostService from "../services/blockfrostService.js";
+import blockfrostService from "../service/BlockfrostService.js";
 
 class TransactionWorker {
   constructor() {

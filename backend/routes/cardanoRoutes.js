@@ -1,6 +1,6 @@
 // routes/cardanoRoutes.js
 import express from "express";
-import blockfrostService from "../services/blockfrostService.js";
+import blockfrostService from "../service/BlockfrostService.js";
 import { validateWalletAddress } from "../middleware/walletAuth.js";
 
 const router = express.Router();

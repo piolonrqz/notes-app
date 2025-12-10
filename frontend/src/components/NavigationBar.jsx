@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { HomeIcon, PlusCircleIcon, ArchiveIcon, Sparkles } from 'lucide-react';
+import WalletConnect from './wallet/walletConnect'; // <--- UPDATED PATH
 
 const NavigationBar = () => {
   return (
@@ -13,7 +14,7 @@ const NavigationBar = () => {
             <span className="text-xl font-bold text-white">Jakwelin Notes</span>
           </Link>
 
-          {/* Navigation Links */}
+          {/* Navigation Links + Wallet */}
           <div className="flex items-center gap-2">
             <Link
               to="/"
@@ -38,6 +39,12 @@ const NavigationBar = () => {
               <ArchiveIcon className="w-4 h-4" />
               <span className="hidden sm:inline">Archived</span>
             </Link>
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-white/10 mx-2" />
+
+            {/* Wallet Connect Button */}
+            <WalletConnect />
           </div>
         </div>
       </div>

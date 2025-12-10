@@ -36,6 +36,24 @@ export const isValidTxHash = (hash) => {
 };
 
 /**
+ * Format operation string to standardized format
+ * @param {String} operation - Operation type (create, update, delete, etc.)
+ * @returns {String} Formatted operation string
+ */
+export const formatOperation = (operation) => {
+    if (!operation) return 'UNKNOWN';
+    
+    const normalized = operation.toLowerCase();
+    const standardOps = ['create', 'update', 'delete'];
+    
+    if (standardOps.includes(normalized)) {
+        return `${normalized.toUpperCase()}_NOTE`;
+    }
+    
+    return operation.toUpperCase();
+};
+
+/**
  * Helper function to chunk text into 64-byte segments for Cardano metadata
  * @param {String} text - Text to chunk
  * @param {Number} maxBytes - Maximum bytes per chunk (default 64)
@@ -256,9 +274,10 @@ export const isValidWalletAddress = (address) => {
 export default {
     createNoteMetadata,
     isValidTxHash,
-    getMinimumAda,
     formatOperation,
-    parseTxResponse,
-    createTxPayload,
-    isValidWalletAddress
+    isValidWalletAddress,
+    createNoteTransaction,
+    checkBalance,
+    getAdaBalance,
+    sendToBackend
 };
