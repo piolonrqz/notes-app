@@ -1,70 +1,64 @@
+import React from 'react';
+import { useWallet } from '../../hooks/useWallet'; // <--- FIXED: Go up 2 levels
+import { Wallet, LogOut, Loader2 } from 'lucide-react';
 
-import React, { useState } from 'react';
-import { useWallet } from '../../hooks/useWallet';
-import { SUPPORTED_WALLETS, getWalletIcon, truncateAddress } from '../../utils/cardano';
-import '../styles/WalletConnect.css';
+const WalletConnect = () => {
+    const { connected, address, connectWallet, disconnectWallet, connecting } = useWallet();
 
-export const WalletConnect = () => {
-    const { isConnected, walletAddress, connectWallet, disconnectWallet, loading, error } = useWallet();
-    const [showWallets, setShowWallets] = useState(false);
-
-    const handleWalletSelect = async (walletName) => {
-        try {
-            await connectWallet(walletName);
-            setShowWallets(false);
-        } catch (err) {
-            console.error('Wallet connection failed:', err);
-        }
+    // Helper to shorten the address (e.g., addr1...xy123)
+    const formatAddress = (addr) => {
+        if (!addr) return '';
+        return `${addr.slice(0, 10)}...${addr.slice(-6)}`;
     };
 
-    const handleDisconnect = async () => {
-        try {
-            await disconnectWallet();
-        } catch (err) {
-            console.error('Wallet disconnection failed:', err);
-        }
-    };
-
-    if (isConnected && walletAddress) {
+    // State: Connected
+    if (connected && address) {
         return (
-            <div className="wallet-connected">
-                <div className="wallet-info">
-                    <span className="wallet-address">{truncateAddress(walletAddress)}</span>
-                    <button className="disconnect-btn" onClick={handleDisconnect} disabled={loading}>
-                        {loading ? 'Disconnecting...' : 'Disconnect'}
-                    </button>
+            <div className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-white/10 border border-white/10">
+                <div className="flex items-center gap-2">
+                    {/* Status Dot */}
+                    <div className="relative flex w-2 h-2">
+                        <span className="absolute inline-flex w-full h-full bg-green-400 rounded-full opacity-75 animate-ping"></span>
+                        <span className="relative inline-flex w-2 h-2 bg-green-500 rounded-full"></span>
+                    </div>
+                    <span className="text-xs font-mono font-medium text-white/90">
+            {formatAddress(address)}
+          </span>
                 </div>
+
+                <div className="w-px h-4 mx-1 bg-white/20" />
+
+                <button
+                    onClick={disconnectWallet}
+                    className="p-1.5 text-white/60 hover:text-red-400 hover:bg-white/10 rounded-md transition-all"
+                    title="Disconnect Wallet"
+                >
+                    <LogOut size={14} />
+                </button>
             </div>
         );
     }
 
+    // State: Disconnected / Connecting
     return (
-        <div className="wallet-connect-container">
-            <button
-                className="connect-btn"
-                onClick={() => setShowWallets(!showWallets)}
-                disabled={loading}
-            >
-                {loading ? 'Connecting...' : 'Connect Wallet'}
-            </button>
-
-            {showWallets && (
-                <div className="wallet-dropdown">
-                    {SUPPORTED_WALLETS.map((wallet) => (
-                        <button
-                            key={wallet}
-                            className="wallet-option"
-                            onClick={() => handleWalletSelect(wallet)}
-                            disabled={loading}
-                        >
-                            <span className="wallet-icon">{getWalletIcon(wallet)}</span>
-                            <span className="wallet-name">{wallet.toUpperCase()}</span>
-                        </button>
-                    ))}
-                </div>
+        <button
+            onClick={() => connectWallet('lace')} // Defaults to Lace
+            disabled={connecting}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition-all rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 active:scale-95"
+        >
+            {connecting ? (
+                <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <Wallet className="w-4 h-4" />
+                    <span>Connect Wallet</span>
+                </>
             )}
-
-            {error && <div className="error-message">{error}</div>}
-        </div>
+        </button>
     );
 };
+
+export default WalletConnect;
