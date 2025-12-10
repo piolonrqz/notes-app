@@ -7,6 +7,7 @@ import { connectDB } from "./config/db.js";
 import notesRoutes from "./routes/notesRoutes.js";
 import statusRoutes from "./routes/statusRoutes.js"; // ✅ NEW
 import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
+import transactionWorker from "./workers/transactionWorker.js";
 
 dotenv.config();
 
@@ -21,6 +22,26 @@ app.use(cors({
 
 // Connect DB
 connectDB();
+
+connectDB().then(() => {
+  // Start worker
+  if (process.env.WORKER_ENABLED !== 'false') {
+    transactionWorker.start();
+  }
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  transactionWorker.stop();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Shutting down gracefully...');
+  transactionWorker.stop();
+  process.exit(0);
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
