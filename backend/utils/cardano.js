@@ -1,44 +1,38 @@
-// Cardano network configuration
-export const CARDANO_NETWORK = 'preview';
+/**
+ * Cardano blockchain utilities for Notes App
+ * Handles transaction creation and metadata formatting
+ */
 
-export const SUPPORTED_WALLETS = ['lace', 'nami'];
+/**
+ * Create metadata for note operations
+ * Using label 42819 (not reserved, safe for custom apps)
+ */
 
-// Format lovelace to ADA
-export const formatLovelace = (lovelace) => {
-  if (!lovelace) return '0';
-  const ada = BigInt(lovelace) / BigInt(1000000);
-  const remainder = BigInt(lovelace) % BigInt(1000000);
-  return `${ada}.${String(remainder).padStart(6, '0')}`;
+export const createNoteMetadata = (operation, noteData) => {
+    const { noteId, title, content } = noteData;
+
+    return {
+        42819: {
+            action: operation,
+            note_id: noteId,
+            title: title?.substring(0, 64) || 'Untitled',
+            content: content?.substring(0, 200) || '', // Preview only
+            timestamp: new Date().toISOString()
+        }
+    };
 };
 
-// Convert lovelace to ADA
-export const lovelaceToAda = (lovelace) => {
-  return Number(lovelace) / 1000000;
-};
-
-// Convert ADA to lovelace
-export const adaToLovelace = (ada) => {
-  return Math.floor(Number(ada) * 1000000);
-};
-
-// Truncate address for display
-export const truncateAddress = (address, chars = 8) => {
-  if (!address) return '';
-  return `${address.slice(0, chars)}...${address.slice(-chars)}`;
-};
-
-// Validate Cardano address
-export const isValidAddress = (address) => {
-  return /^addr[a-z0-9]{53,88}$/i.test(address);
-};
-
-// Get wallet icon emoji
-export const getWalletIcon = (walletName) => {
-  const icons = {
-    lace: '🎯',
-    nami: '🦊',
-  };
-  return icons[walletName?.toLowerCase()] || '💼';
+// Validate transaction hash format
+export const isValidTxHash = (hash) => {
+    if (!hash) return false;
+    
+    // Allow dev mode tx hashes
+    if (process.env.NODE_ENV === 'development' && hash.startsWith('dev_tx_')) {
+        return true;
+    }
+    
+    // Real Cardano tx hash: 64 hex characters
+    return /^[a-f0-9]{64}$/i.test(hash);
 };
 
 /**
@@ -243,15 +237,28 @@ export const sendToBackend = async (url, data, walletAddress, method = 'POST') =
   return response.json();
 };
 
+/**
+ * NEW: Validate Cardano wallet address
+ */
+export const isValidWalletAddress = (address) => {
+    if (!address) return false;
+    
+    // Allow dev mode addresses
+    if (process.env.NODE_ENV === 'development' && address.startsWith('dev_wallet_')) {
+        return true;
+    }
+    
+    // Real Cardano addresses start with these prefixes
+    const validPrefixes = ['addr1', 'addr_test', 'addr_vkh'];
+    return validPrefixes.some(prefix => address.startsWith(prefix));
+};
+
 export default {
-  createNoteTransaction,
-  checkBalance,
-  getAdaBalance,
-  sendToBackend,
-  formatLovelace,
-  lovelaceToAda,
-  adaToLovelace,
-  truncateAddress,
-  isValidAddress,
-  getWalletIcon
+    createNoteMetadata,
+    isValidTxHash,
+    getMinimumAda,
+    formatOperation,
+    parseTxResponse,
+    createTxPayload,
+    isValidWalletAddress
 };

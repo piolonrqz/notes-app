@@ -1,57 +1,69 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { PlusIcon, WalletIcon, X } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
-
-/**
- * Truncate Ethereum address for display
- */
-const truncateAddress = (address, length = 6) => {
-  if (!address) return '';
-  return `${address.slice(0, length)}...${address.slice(-4)}`;
-};
+import { truncateAddress } from '../../utils/cardano';
+import CreateNoteModal from '../notes/CreateNoteModal';
+import toast from 'react-hot-toast';
 
 /**
  * Floating Action Buttons - Chatbot-style placement
  */
-const FloatingActions = () => {
+const FloatingActions = ({ onNoteCreated }) => {
   const { connected, address, connectWallet, disconnectWallet, loading } = useWallet();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const handleWalletClick = async () => {
+    console.log('Wallet button clicked! Connected:', connected);
+    
     if (connected) {
       disconnectWallet();
+      toast.success('Wallet disconnected');
     } else {
       try {
-        await connectWallet();
+        toast.loading('Connecting to Lace wallet...', { id: 'wallet-connect' });
+        const result = await connectWallet();
+        console.log('Connection result:', result);
+        toast.success('Wallet connected successfully!', { id: 'wallet-connect' });
       } catch (error) {
         console.error('Wallet connection error:', error);
+        toast.error(error.message || 'Failed to connect wallet', { id: 'wallet-connect' });
       }
     }
   };
 
+  const handleNewNote = () => {
+    setIsExpanded(false);
+    setShowCreateModal(true);
+  };
+
   return (
-    <div className="fixed z-50 flex flex-col-reverse items-end gap-4 bottom-8 right-8">
+      <>
+          <CreateNoteModal 
+            isOpen={showCreateModal} 
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={onNoteCreated}
+          />
+    <div className="fixed bottom-8 right-8 z-50 flex flex-col-reverse items-end gap-4">
       {/* Expanded Buttons */}
       {isExpanded && (
         <>
           {/* New Note Button */}
-          <Link
-            to="/create"
+          <button
+            onClick={handleNewNote}
             className="flex items-center gap-3 px-6 py-3 font-medium text-white transition-all duration-300 shadow-2xl bg-gradient-to-r from-brand-medium to-brand-light rounded-2xl hover:shadow-brand-light/50 hover:scale-105 animate-slide-in group"
-            onClick={() => setIsExpanded(false)}
           >
             <PlusIcon className="w-5 h-5 transition-transform group-hover:rotate-90" />
             <span>New Note</span>
-          </Link>
+          </button>
 
           {/* Wallet Button */}
           <button
             onClick={handleWalletClick}
             disabled={loading}
-            className={`flex items-center gap-3 px-6 py-3 font-medium transition-all duration-300 shadow-2xl rounded-2xl hover:scale-105 animate-slide-in ${
+            className={`flex items-center gap-3 px-6 py-3 font-medium transition-all duration-300 shadow-2xl rounded-2xl hover:scale-105 animate-slide-in group ${
               connected
-                ? 'bg-white text-brand-dark hover:bg-gray-100'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-green-500/50'
                 : 'bg-gradient-to-r from-brand-light to-brand-lighter text-white hover:shadow-brand-lighter/50'
             }`}
           >
@@ -62,8 +74,14 @@ const FloatingActions = () => {
               </>
             ) : connected ? (
               <>
-                <WalletIcon className="w-5 h-5" />
-                <span>{truncateAddress(address, 6)}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <WalletIcon className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs font-normal opacity-90">Connected</span>
+                  <span className="text-sm font-semibold">{truncateAddress(address, 4)}</span>
+                </div>
               </>
             ) : (
               <>
@@ -89,6 +107,7 @@ const FloatingActions = () => {
         )}
       </button>
     </div>
+    </>
   );
 };
 

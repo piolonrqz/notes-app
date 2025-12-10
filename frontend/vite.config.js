@@ -1,23 +1,41 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import wasm from 'vite-plugin-wasm'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    wasm(),
-    react()
+    react(),
+    nodePolyfills({
+      include: ['buffer', 'process', 'util', 'stream', 'events'],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+    }),
   ],
+  define: {
+    'process.env': {},
+    'process.version': JSON.stringify(''),
+    'process.versions': JSON.stringify({}),
+    global: 'globalThis',
+  },
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+      process: 'process/browser',
+      util: 'util',
+    }
+  },
   optimizeDeps: {
     esbuildOptions: {
-      target: 'esnext'
-    },
-    exclude: ['lucid-cardano']
+      define: {
+        global: 'globalThis'
+      }
+    }
   },
-  build: {
-    target: 'esnext'
+  server: {
+    port: 5173,
   },
-  define: {
-    global: 'globalThis'
-  }
 })
