@@ -2,11 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { HomeIcon, PlusCircleIcon, ArchiveIcon, Sparkles } from 'lucide-react';
 import WalletConnect from './wallet/walletConnect'; // <--- UPDATED PATH
+import { useWallet } from '../hooks/useWallet';
+import { usePendingTransactions } from '../hooks/usePendingTransactions';
+import BlockchainSyncIndicator from './common/BlockchainSyncIndicator';
 
 const NavigationBar = () => {
+  const { address } = useWallet();
+  const { pendingCount, isSyncing } = usePendingTransactions(address);
+
   return (
-    <nav className="sticky top-0 z-40 border-b backdrop-blur-md" style={{ backgroundColor: 'rgba(27, 39, 65, 0.9)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-40 border-b backdrop-blur-md relative" style={{ backgroundColor: 'rgba(27, 39, 65, 0.9)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-2 transition-opacity group hover:opacity-80">
@@ -15,7 +21,9 @@ const NavigationBar = () => {
           </Link>
 
           {/* Navigation Links + Wallet */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-visible">
+            {/* Blockchain Sync Indicator */}
+            <BlockchainSyncIndicator pendingCount={pendingCount} isSyncing={isSyncing} />
             <Link
               to="/"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all rounded-lg hover:bg-white/10"

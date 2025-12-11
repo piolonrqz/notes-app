@@ -164,6 +164,28 @@ const notesService = {
       console.error('Error unarchiving note:', error);
       throw error;
     }
+  },
+
+  /**
+   * Update transaction status
+   * @param {String} txHash - Transaction hash
+   * @param {String} status - Status: 'pending', 'confirmed', or 'failed'
+   * @param {Number} blockHeight - Optional block height
+   * @param {String} blockTime - Optional block time
+   * @returns {Promise<Object>} Updated note
+   */
+  updateTransactionStatus: async (txHash, status, blockHeight = null, blockTime = null) => {
+    try {
+      const payload = { txHash, status };
+      if (blockHeight !== null) payload.blockHeight = blockHeight;
+      if (blockTime !== null) payload.blockTime = blockTime;
+
+      const response = await api.post('/status/update', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating transaction status:', error);
+      throw error;
+    }
   }
 };
 
