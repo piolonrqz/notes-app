@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
 import { useNotes } from '../../hooks/useNotes';
 import TransactionProgress from '../common/TransactionProgress';
+import RichTextEditor from '../editor/RichTextEditor';
+import { stripHtmlTags } from '../../utils/sanitizeHtml';
 import toast from 'react-hot-toast';
 
 const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
@@ -20,7 +22,10 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
-    if (!title.trim() || !content.trim()) {
+    // Check if content has actual text (strip HTML tags)
+    const plainTextContent = stripHtmlTags(content);
+    
+    if (!title.trim() || !plainTextContent.trim()) {
       toast.error('Title and content are required');
       return;
     }
@@ -118,19 +123,15 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
               <p className="mt-1 text-xs text-white/50">{title.length}/200 characters</p>
             </div>
 
-            {/* Content Textarea */}
+            {/* Content Rich Text Editor */}
             <div className="mb-6">
               <label className="block mb-2 text-sm font-medium text-white">
                 Content <span className="text-red-400">*</span>
               </label>
-              <textarea
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
                 placeholder="Write your note content here..."
-                rows={10}
-                className="w-full px-4 py-3 text-white placeholder-white/40 bg-gray-700/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-transparent transition-all resize-none"
-                disabled={loading}
-                required
               />
             </div>
 

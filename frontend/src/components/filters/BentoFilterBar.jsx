@@ -13,7 +13,7 @@ const BentoFilterBar = ({
   onSortChange,
   filterBy,
   onFilterChange,
-  resultsCount 
+  // resultsCount 
 }) => {
   const [showSortPanel, setShowSortPanel] = useState(false);
   const { connected, balance } = useWallet();
@@ -68,7 +68,7 @@ const BentoFilterBar = ({
           )}
         </div>
 
-        {/* Results Count Badge
+        {/* Results Count Badgef
         {resultsCount > 0 && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-brand-lighter/20 border border-brand-light/30 backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-brand-lighter" />

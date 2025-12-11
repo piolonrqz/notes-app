@@ -2,6 +2,7 @@ import React from 'react';
 import { PenSquareIcon, Trash2Icon, Clock, Calendar } from 'lucide-react';
 import { formatDate } from '../../lib/utils';
 import StatusBadge from '../common/StatusBadge';
+import { stripHtmlTags } from '../../utils/sanitizeHtml';
 
 /**
  * Bento Grid Layout for Notes - Uniform 3-column grid with fixed-height cards
@@ -98,7 +99,7 @@ const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
 
               {/* Content Preview */}
               <p className="text-gray-300 text-sm flex-1 break-words [overflow-wrap:anywhere] line-clamp-4">
-                {note.content}
+                {stripHtmlTags(note.content)}
               </p>
 
               {/* Footer */}

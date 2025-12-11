@@ -4,6 +4,7 @@ import { formatDate } from '../../lib/utils';
 import DeleteNote from './DeleteNote';
 import EditNoteModal from './EditNoteModal';
 import StatusBadge from '../common/StatusBadge';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import toast from 'react-hot-toast';
 import BlockchainStatus from './BlockchainStatus';
 
@@ -107,8 +108,30 @@ const NoteDetailSlideOver = ({ note, isOpen, onClose, onDelete, onArchive, onUpd
             <div className="border-t border-white/10" />
 
             <div className="prose prose-invert max-w-none">
-              <div className="text-white/90 whitespace-pre-wrap leading-relaxed">{note.content}</div>
+              <div 
+                className="text-white/90 leading-relaxed rich-content"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(note.content) }}
+              />
             </div>
+            <style>{`
+              .rich-content h1, .rich-content h2, .rich-content h3 {
+                color: white;
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+              }
+              .rich-content h1 { font-size: 2rem; font-weight: bold; }
+              .rich-content h2 { font-size: 1.5rem; font-weight: bold; }
+              .rich-content h3 { font-size: 1.25rem; font-weight: bold; }
+              .rich-content p { margin: 0.5rem 0; }
+              .rich-content ul, .rich-content ol {
+                margin: 0.5rem 0;
+                padding-left: 1.5rem;
+              }
+              .rich-content li { margin: 0.25rem 0; }
+              .rich-content strong { font-weight: bold; }
+              .rich-content em { font-style: italic; }
+              .rich-content u { text-decoration: underline; }
+            `}</style>
 
             {/* Blockchain Status Section */}
             <div className="mt-auto pt-6 pb-6">
