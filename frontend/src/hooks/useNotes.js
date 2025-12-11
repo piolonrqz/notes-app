@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import notesService from '../services/notesService';
 import { createNoteTransaction } from '../utils/cardano';
+import { useWallet } from './useWallet';
 import toast from 'react-hot-toast';
 
 export const useNotes = (wallet, address) => {
@@ -8,6 +9,7 @@ export const useNotes = (wallet, address) => {
   const [loading, setLoading] = useState(false);
   const [transactionStage, setTransactionStage] = useState(null);
   const [txHash, setTxHash] = useState(null);
+  const { refreshBalance } = useWallet();
 
   // Fetch all notes
   const fetchNotes = useCallback(async () => {
@@ -39,6 +41,16 @@ export const useNotes = (wallet, address) => {
   const getNote = useCallback(async (id) => {
     return await notesService.getNoteById(id);
   }, []);
+
+  // Refresh balance when transaction is confirmed
+  useEffect(() => {
+    if (transactionStage === 'confirmed' && refreshBalance) {
+      // Small delay to ensure blockchain has updated
+      setTimeout(() => {
+        refreshBalance();
+      }, 2000);
+    }
+  }, [transactionStage, refreshBalance]);
 
   // Create Note: Blockchain -> Backend
   const createNote = useCallback(async (title, content) => {
@@ -180,6 +192,13 @@ export const useNotes = (wallet, address) => {
         return prevArray.filter(n => n._id !== id);
       });
       toast.success('Note deleted!', { id: toastId });
+      
+      // Refresh balance after deletion
+      if (refreshBalance) {
+        setTimeout(() => {
+          refreshBalance();
+        }, 2000);
+      }
 
     } catch (error) {
       console.error('Delete failed:', error);
@@ -187,7 +206,7 @@ export const useNotes = (wallet, address) => {
     } finally {
       setLoading(false);
     }
-  }, [wallet, address]);
+  }, [wallet, address, refreshBalance]);
 
   return {
     notes,

@@ -7,17 +7,12 @@ import { usePendingTransactions } from '../hooks/usePendingTransactions';
 import BlockchainSyncIndicator from './common/BlockchainSyncIndicator';
 
 const NavigationBar = () => {
-  const { balance, connected, address } = useWallet();
+  const { address } = useWallet();
   const { pendingCount, isSyncing } = usePendingTransactions(address);
 
   return (
     <nav className="sticky top-0 z-40 border-b backdrop-blur-md relative" style={{ backgroundColor: 'rgba(27, 39, 65, 0.9)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-      {connected && balance && (
-        <div className="absolute top-2 right-4 text-xs text-white/80 px-2 py-1 rounded bg-white/5 z-50">
-          {balance} ADA
-        </div>
-      )}
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-2 transition-opacity group hover:opacity-80">

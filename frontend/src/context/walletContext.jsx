@@ -11,6 +11,35 @@ export const WalletProvider = ({ children }) => {
     const [connecting, setConnecting] = useState(false);
     const [balance, setBalance] = useState('0');
     const hasAutoConnectedRef = useRef(false);
+    const balanceIntervalRef = useRef(null);
+
+    // Fetch balance from wallet
+    const fetchBalance = useCallback(async () => {
+        if (!wallet) return;
+        try {
+            const lovelace = await wallet.getLovelace();
+            const adaBalance = (parseInt(lovelace) / 1000000).toFixed(2);
+            setBalance(adaBalance);
+            return adaBalance;
+        } catch (error) {
+            console.error('Error fetching balance:', error);
+            return null;
+        }
+    }, [wallet]);
+
+    const disconnectWallet = useCallback(() => {
+        // Clear balance refresh interval
+        if (balanceIntervalRef.current) {
+            clearInterval(balanceIntervalRef.current);
+            balanceIntervalRef.current = null;
+        }
+        setWallet(null);
+        setAddress(null);
+        setConnected(false);
+        setBalance('0');
+        localStorage.removeItem('connectedWallet');
+        localStorage.removeItem('walletAddress');
+    }, []);
 
     // Connect to a specific wallet (e.g., 'lace', 'nami')
     const connectWallet = useCallback(async (walletName = 'lace') => {
@@ -32,11 +61,9 @@ export const WalletProvider = ({ children }) => {
 
             localStorage.setItem('walletAddress', changeAddress);
 
-            // Get Balance (in Lovelace, convert to ADA)
-            const lovelace = await browserWallet.getLovelace();
-            setBalance((parseInt(lovelace) / 1000000).toFixed(2));
-
             setConnected(true);
+
+            // Balance will be fetched automatically by the useEffect hook
 
             // Persist connection
             localStorage.setItem('connectedWallet', walletName);
@@ -49,16 +76,27 @@ export const WalletProvider = ({ children }) => {
         } finally {
             setConnecting(false);
         }
-    }, []);
+    }, [disconnectWallet]);
 
-    const disconnectWallet = useCallback(() => {
-        setWallet(null);
-        setAddress(null);
-        setConnected(false);
-        setBalance('0');
-        localStorage.removeItem('connectedWallet');
-        localStorage.removeItem('walletAddress');
-    }, []);
+    // Refresh balance periodically when connected
+    useEffect(() => {
+        if (connected && wallet) {
+            // Initial fetch
+            fetchBalance();
+
+            // Set up periodic refresh every 30 seconds
+            balanceIntervalRef.current = setInterval(() => {
+                fetchBalance();
+            }, 30000); // Refresh every 30 seconds
+
+            return () => {
+                if (balanceIntervalRef.current) {
+                    clearInterval(balanceIntervalRef.current);
+                    balanceIntervalRef.current = null;
+                }
+            };
+        }
+    }, [connected, wallet, fetchBalance]);
 
     // Auto-connect on mount
     useEffect(() => {
@@ -80,7 +118,8 @@ export const WalletProvider = ({ children }) => {
             connecting,  // Loading state
             balance,     // ADA Balance
             connectWallet,
-            disconnectWallet
+            disconnectWallet,
+            refreshBalance: fetchBalance  // Function to manually refresh balance
         }}>
             {children}
         </WalletContext.Provider>

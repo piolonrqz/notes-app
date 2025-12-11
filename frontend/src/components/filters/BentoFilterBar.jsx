@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, Coins } from 'lucide-react';
 import SortPanel from './SortPanel';
+import { useWallet } from '../../hooks/useWallet';
 
 /**
  * Modern filter bar with Bento aesthetic
@@ -15,6 +16,7 @@ const BentoFilterBar = ({
   resultsCount 
 }) => {
   const [showSortPanel, setShowSortPanel] = useState(false);
+  const { connected, balance } = useWallet();
 
   return (
     <div className="mb-8">
@@ -66,13 +68,24 @@ const BentoFilterBar = ({
           )}
         </div>
 
-        {/* Results Count Badge */}
+        {/* Results Count Badge
         {resultsCount > 0 && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-brand-lighter/20 border border-brand-light/30 backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-brand-lighter" />
             <span className="font-medium text-white">
               {resultsCount} {resultsCount === 1 ? 'note' : 'notes'}
             </span>
+          </div>
+        )} */}
+
+        {/* Balance Display */}
+        {connected && balance && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-brand-light/20 to-brand-lighter/20 border border-brand-light/30 backdrop-blur-sm">
+            <Coins className="w-4 h-4 text-brand-lighter" />
+            <span className="font-medium text-white">
+              {parseFloat(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ADA
+            </span>
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
           </div>
         )}
       </div>
