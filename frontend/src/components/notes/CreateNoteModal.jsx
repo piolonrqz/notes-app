@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
 import { useNotes } from '../../hooks/useNotes';
+import TransactionProgress from '../common/TransactionProgress';
 import toast from 'react-hot-toast';
 
 const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
   const { wallet, address, connected } = useWallet();
-  const { createNote, loading } = useNotes(wallet, address);
+  const { createNote, loading, transactionStage, txHash } = useNotes(wallet, address);
   
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -133,8 +134,18 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
               />
             </div>
 
+            {/* Transaction Progress */}
+            {transactionStage && (
+              <div className="mb-6">
+                <TransactionProgress 
+                  stage={transactionStage} 
+                  txHash={txHash}
+                />
+              </div>
+            )}
+
             {/* Blockchain Info */}
-            {connected && (
+            {connected && !transactionStage && (
               <div className="mb-6 p-4 rounded-xl bg-brand-light/20 border border-brand-light/30">
                 <div className="flex items-start gap-3">
                   <svg
@@ -170,13 +181,18 @@ const CreateNoteModal = ({ isOpen, onClose, onSuccess }) => {
               </button>
               <button
                 type="submit"
-                disabled={loading || !connected}
+                disabled={loading || !connected || transactionStage}
                 className="px-6 py-2.5 font-medium text-white bg-gradient-to-br from-brand-light to-brand-lighter rounded-xl hover:scale-105 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
               >
-                {loading ? (
+                {loading || transactionStage ? (
                   <>
                     <span className="loading loading-spinner loading-sm"></span>
-                    Creating...
+                    {transactionStage === 'confirmed' ? 'Created!' : 
+                     transactionStage === 'failed' ? 'Failed' :
+                     transactionStage === 'confirming' ? 'Confirming...' :
+                     transactionStage === 'submitting' ? 'Submitting...' :
+                     transactionStage === 'signing' ? 'Signing...' :
+                     'Creating...'}
                   </>
                 ) : (
                   'Create Note'

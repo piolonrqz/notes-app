@@ -6,7 +6,7 @@ import StatusBadge from '../common/StatusBadge';
 /**
  * Bento Grid Layout for Notes - Uniform 3-column grid with fixed-height cards
  */
-const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
+const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
   if (!notes || notes.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -66,14 +66,20 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div 
+                  className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      // Handle edit
+                      if (onEdit) onEdit(note._id);
                     }}
                     className="p-1.5 rounded-lg bg-brand-light/20 hover:bg-brand-light/30 shadow-sm transition-all hover:shadow-md"
+                    title="Edit note"
                   >
                     <PenSquareIcon className="w-4 h-4 text-brand-lighter" />
                   </button>
@@ -84,6 +90,7 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
                       if (onDelete) onDelete(note._id);
                     }}
                     className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 shadow-sm transition-all"
+                    title="Delete note"
                   >
                     <Trash2Icon className="w-4 h-4 text-red-400" />
                   </button>

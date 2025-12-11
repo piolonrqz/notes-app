@@ -5,15 +5,18 @@ import BentoFilterBar from '../components/filters/BentoFilterBar';
 import FloatingActions from '../components/common/FloatingActions';
 import NoteDetailSlideOver from '../components/notes/NoteDetailSlideOver';
 import DeleteNote from '../components/notes/DeleteNote';
+import EditNoteModal from '../components/notes/EditNoteModal';
 import RateLimitedUI from '../components/RateLimitedUI';
 import { useWallet } from '../hooks/useWallet';
 import { useNotes } from '../hooks/useNotes';
 import { useSearch } from '../hooks/useSearch';
+import { usePendingTransactions } from '../hooks/usePendingTransactions';
 import toast from 'react-hot-toast';
 
 const Home = () => {
   const { wallet, address, connected } = useWallet();
   const { notes, loading, fetchNotes, deleteNote, updateNote, setNotes } = useNotes(wallet, address);
+  const { refresh: refreshPendingCount } = usePendingTransactions(address);
 
   // Clear notes when wallet disconnects
   useEffect(() => {
@@ -57,6 +60,7 @@ const Home = () => {
   const [deleting, setDeleting] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [showNoteDetail, setShowNoteDetail] = useState(false);
+  const [editModal, setEditModal] = useState({ isOpen: false, note: null });
 
   // Reload notes whenever the wallet address becomes available
   useEffect(() => {
@@ -65,12 +69,20 @@ const Home = () => {
         console.error('Fetch error:', error);
         if (error.response?.status === 429) setIsRateLimited(true);
       });
+      refreshPendingCount();
     }
-  }, [address, fetchNotes]);
+  }, [address, fetchNotes, refreshPendingCount]);
 
   const handleDeleteClick = (noteId) => {
     const noteToDelete = realNotes.find(n => n._id === noteId);
     setDeleteModal({ isOpen: true, note: noteToDelete });
+  };
+
+  const handleEditClick = (noteId) => {
+    const noteToEdit = realNotes.find(n => n._id === noteId);
+    if (noteToEdit) {
+      setEditModal({ isOpen: true, note: noteToEdit });
+    }
   };
 
   const handleConfirmDelete = async (noteId) => {
@@ -180,6 +192,7 @@ const Home = () => {
             <NoteBentoGrid
               notes={filteredNotes}
               onDelete={handleDeleteClick}
+              onEdit={handleEditClick}
               onNoteClick={handleNoteClick}
             />
           ) : (
@@ -207,6 +220,13 @@ const Home = () => {
         onConfirm={handleConfirmDelete}
         note={deleteModal.note}
         loading={deleting}
+      />
+
+      <EditNoteModal
+        isOpen={editModal.isOpen}
+        note={editModal.note}
+        onClose={() => setEditModal({ isOpen: false, note: null })}
+        onUpdate={handleUpdateNote}
       />
 
       <NoteDetailSlideOver

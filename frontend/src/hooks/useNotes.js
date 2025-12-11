@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 export const useNotes = (wallet, address) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [transactionStage, setTransactionStage] = useState(null);
+  const [txHash, setTxHash] = useState(null);
 
   // Fetch all notes
   const fetchNotes = useCallback(async () => {
@@ -13,9 +15,21 @@ export const useNotes = (wallet, address) => {
     setLoading(true);
     try {
       const data = await notesService.getAllNotes(address);
-      setNotes(data);
+      // Unwrap backend response - handle different response formats
+      let notesArray = [];
+      if (Array.isArray(data)) {
+        notesArray = data;
+      } else if (data && Array.isArray(data.data)) {
+        notesArray = data.data;
+      } else if (data && Array.isArray(data.notes)) {
+        notesArray = data.notes;
+      } else if (data && Array.isArray(data.result)) {
+        notesArray = data.result;
+      }
+      setNotes(notesArray);
     } catch (error) {
       console.error('Error fetching notes:', error);
+      setNotes([]); // Set to empty array on error
     } finally {
       setLoading(false);
     }
@@ -34,36 +48,62 @@ export const useNotes = (wallet, address) => {
     }
 
     setLoading(true);
-    const toastId = toast.loading('Creating note on blockchain...');
+    setTransactionStage('building');
+    setTxHash(null);
+    const toastId = toast.loading('Building transaction...');
 
     try {
       // 1. Generate a Unique ID for the note
       const noteId = crypto.randomUUID(); 
 
       // 2. Create Transaction on Blockchain (Include noteId in metadata)
-      const txHash = await createNoteTransaction(
+      setTransactionStage('signing');
+      toast.loading('Signing transaction...', { id: toastId });
+      
+      setTransactionStage('submitting');
+      toast.loading('Submitting to blockchain...', { id: toastId });
+      
+      const hash = await createNoteTransaction(
         wallet, 
         { noteId, title, content }, 
         'CREATE'
       );
       
-      toast.loading('Syncing with database...', { id: toastId });
+      setTxHash(hash);
+      setTransactionStage('confirming');
+      toast.loading('Waiting for confirmation...', { id: toastId });
 
       // 3. Save to Backend (Include noteId to fix validation error)
       const newNote = await notesService.createNote(
-        { noteId, title, content, txHash }, 
+        { noteId, title, content, txHash: hash }, 
         address
       );
 
-      setNotes(prev => [newNote, ...prev]);
+      setNotes(prev => {
+        const prevArray = Array.isArray(prev) ? prev : [];
+        return [newNote, ...prevArray];
+      });
+      setTransactionStage('confirmed');
       toast.success('Note created successfully!', { id: toastId });
+      
+      // Reset after a delay
+      setTimeout(() => {
+        setTransactionStage(null);
+        setTxHash(null);
+      }, 3000);
+      
       return newNote;
 
     } catch (error) {
       console.error('Create note failed:', error);
+      setTransactionStage('failed');
       // Extract nice error message if possible
       const message = error.response?.data?.error || error.message || 'Failed to create note';
       toast.error(message, { id: toastId });
+      setTimeout(() => {
+        setTransactionStage(null);
+        setTxHash(null);
+      }, 3000);
       throw error;
     } finally {
       setLoading(false);
@@ -73,25 +113,51 @@ export const useNotes = (wallet, address) => {
   // Update Note
   const updateNote = useCallback(async (id, title, content) => {
     setLoading(true);
-    const toastId = toast.loading('Updating note on blockchain...');
+    setTransactionStage('building');
+    setTxHash(null);
+    const toastId = toast.loading('Building transaction...');
 
     try {
+      setTransactionStage('signing');
+      toast.loading('Signing transaction...', { id: toastId });
+      
+      setTransactionStage('submitting');
+      toast.loading('Submitting to blockchain...', { id: toastId });
+      
       // 1. Record Update on Blockchain
-      const txHash = await createNoteTransaction(wallet, { noteId: id, title, content }, 'UPDATE');
+      const hash = await createNoteTransaction(wallet, { noteId: id, title, content }, 'UPDATE');
+      
+      setTxHash(hash);
+      setTransactionStage('confirming');
+      toast.loading('Waiting for confirmation...', { id: toastId });
 
       // 2. Update Backend
       const updatedNote = await notesService.updateNote(
         id, 
-        { title, content, txHash }, 
+        { title, content, txHash: hash }, 
         address
       );
 
-      setNotes(prev => prev.map(n => n._id === id ? updatedNote : n));
+      setNotes(prev => {
+        const prevArray = Array.isArray(prev) ? prev : [];
+        return prevArray.map(n => n._id === id ? updatedNote : n);
+      });
+      setTransactionStage('confirmed');
       toast.success('Note updated!', { id: toastId });
+      
+      setTimeout(() => {
+        setTransactionStage(null);
+        setTxHash(null);
+      }, 3000);
 
     } catch (error) {
       console.error('Update failed:', error);
+      setTransactionStage('failed');
       toast.error('Failed to update note', { id: toastId });
+      setTimeout(() => {
+        setTransactionStage(null);
+        setTxHash(null);
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -109,7 +175,10 @@ export const useNotes = (wallet, address) => {
       // 2. Delete from Backend
       await notesService.deleteNote(id, txHash, address);
 
-      setNotes(prev => prev.filter(n => n._id !== id));
+      setNotes(prev => {
+        const prevArray = Array.isArray(prev) ? prev : [];
+        return prevArray.filter(n => n._id !== id);
+      });
       toast.success('Note deleted!', { id: toastId });
 
     } catch (error) {
@@ -123,6 +192,8 @@ export const useNotes = (wallet, address) => {
   return {
     notes,
     loading,
+    transactionStage,
+    txHash,
     fetchNotes,
     getNote,
     createNote,
