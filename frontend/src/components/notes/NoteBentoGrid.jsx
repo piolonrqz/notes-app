@@ -1,10 +1,8 @@
 import React from 'react';
 import { PenSquareIcon, Trash2Icon, Clock, Calendar } from 'lucide-react';
 import { formatDate } from '../../lib/utils';
+import BlockchainStatus from './BlockchainStatus';
 
-/**
- * Bento Grid Layout for Notes - Aesthetic design with varying card sizes
- */
 const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
   if (!notes || notes.length === 0) {
     return (
@@ -18,15 +16,10 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
     );
   }
 
-  // Function to determine card size based on position
   const getCardClass = (index) => {
     const patterns = [
-      'col-span-1 row-span-2', // Tall
-      'col-span-2 row-span-1', // Wide
-      'col-span-1 row-span-1', // Regular
-      'col-span-1 row-span-1', // Regular
-      'col-span-2 row-span-1', // Wide
-      'col-span-1 row-span-2', // Tall
+      'col-span-1 row-span-2', 'col-span-2 row-span-1', 'col-span-1 row-span-1',
+      'col-span-1 row-span-1', 'col-span-2 row-span-1', 'col-span-1 row-span-2',
     ];
     return patterns[index % patterns.length];
   };
@@ -48,9 +41,9 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
             `}
             style={{
               background: index % 4 === 0 ? 'linear-gradient(135deg, rgba(110, 140, 251, 0.15) 0%, rgba(99, 108, 203, 0.25) 100%)' :
-                         index % 4 === 1 ? 'linear-gradient(135deg, rgba(99, 108, 203, 0.15) 0%, rgba(80, 88, 156, 0.25) 100%)' :
-                         index % 4 === 2 ? 'linear-gradient(135deg, rgba(80, 88, 156, 0.15) 0%, rgba(60, 70, 123, 0.25) 100%)' :
-                         'linear-gradient(135deg, rgba(60, 70, 123, 0.15) 0%, rgba(110, 140, 251, 0.25) 100%)',
+                          index % 4 === 1 ? 'linear-gradient(135deg, rgba(99, 108, 203, 0.15) 0%, rgba(80, 88, 156, 0.25) 100%)' :
+                          index % 4 === 2 ? 'linear-gradient(135deg, rgba(80, 88, 156, 0.15) 0%, rgba(60, 70, 123, 0.25) 100%)' :
+                          'linear-gradient(135deg, rgba(60, 70, 123, 0.15) 0%, rgba(110, 140, 251, 0.25) 100%)',
               backgroundColor: 'rgba(30, 41, 59, 0.8)',
               backdropFilter: 'blur(10px)'
             }}
@@ -75,9 +68,8 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
                 <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // Handle edit
+                      e.preventDefault(); e.stopPropagation();
+                      // Edit logic handled by parent
                     }}
                     className="p-1.5 rounded-lg bg-brand-light/20 hover:bg-brand-light/30 shadow-sm transition-all hover:shadow-md"
                   >
@@ -85,8 +77,7 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
                   </button>
                   <button
                     onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                      e.preventDefault(); e.stopPropagation();
                       if (onDelete) onDelete(note._id);
                     }}
                     className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 shadow-sm transition-all"
@@ -101,21 +92,23 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
                 {note.content}
               </p>
 
-              {/* Footer */}
-              <div className="flex items-center gap-3 mt-4 text-xs text-gray-400">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  <span>{formatDate(new Date(note.createdAt))}</span>
-                </div>
-                {note.updatedAt !== note.createdAt && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>Updated</span>
-                  </div>
-                )}
-              </div>
+              {/* Footer: Show Blockchain Status */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
+                
+                {/* 1. Blockchain Badge */}
+                <BlockchainStatus 
+                  status={note.status} 
+                  txHash={note.transactionHistory?.[note.transactionHistory.length - 1]?.txHash || note.txHash} 
+                />
 
-              {/* Decorative Corner */}
+                {/* 2. Dates */}
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDate(new Date(note.createdAt))}</span>
+                  </div>
+                </div>
+              </div>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-brand-lighter/10 to-transparent rounded-bl-full"></div>
             </div>
           </div>
@@ -126,4 +119,3 @@ const NoteBentoGrid = ({ notes = [], onDelete, onNoteClick }) => {
 };
 
 export default NoteBentoGrid;
-
