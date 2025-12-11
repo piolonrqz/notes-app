@@ -12,7 +12,7 @@ export const useSearch = (notes = []) => {
     : (notes && Array.isArray(notes.notes) ? notes.notes : []);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, title
-  const [filterBy, setFilterBy] = useState('all'); // all, archived, active
+  const [filterBy, setFilterBy] = useState('all'); // all, archived, active, pending, confirmed
 
   /**
    * Filter and search notes based on query
@@ -36,6 +36,12 @@ export const useSearch = (notes = []) => {
       result = result.filter(note => note.archived === true);
     } else if (filterBy === 'active') {
       result = result.filter(note => !note.archived);
+    } else if (filterBy === 'pending') {
+      result = result.filter(note => note.status?.toLowerCase() === 'pending');
+    } else if (filterBy === 'confirmed') {
+      result = result.filter(note => note.status?.toLowerCase() === 'confirmed');
+    } else if (filterBy === 'failed') {
+      result = result.filter(note => note.status?.toLowerCase() === 'failed');
     }
 
     // Apply sorting

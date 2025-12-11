@@ -109,6 +109,26 @@ const BentoFilterBar = ({
         >
           Archived
         </button>
+        <button
+          onClick={() => onFilterChange('pending')}
+          className={`px-6 py-2.5 rounded-xl font-medium transition-all ${
+            filterBy === 'pending'
+              ? 'bg-gradient-to-r from-brand-medium to-brand-light text-white shadow-lg shadow-brand-light/30'
+              : 'bg-gray-800/50 text-gray-300 hover:bg-gray-800 backdrop-blur-sm'
+          }`}
+        >
+          Pending
+        </button>
+        <button
+          onClick={() => onFilterChange('confirmed')}
+          className={`px-6 py-2.5 rounded-xl font-medium transition-all ${
+            filterBy === 'confirmed'
+              ? 'bg-gradient-to-r from-brand-medium to-brand-light text-white shadow-lg shadow-brand-light/30'
+              : 'bg-gray-800/50 text-gray-300 hover:bg-gray-800 backdrop-blur-sm'
+          }`}
+        >
+          Confirmed
+        </button>
       </div>
     </div>
   );

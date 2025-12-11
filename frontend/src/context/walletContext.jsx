@@ -1,10 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserWallet } from '@meshsdk/core';
 import toast from 'react-hot-toast';
 
-// --- THIS LINE WAS LIKELY MISSING ---
 const WalletContext = createContext();
-// ------------------------------------
 
 export const WalletProvider = ({ children }) => {
     const [wallet, setWallet] = useState(null);
@@ -12,6 +10,7 @@ export const WalletProvider = ({ children }) => {
     const [connected, setConnected] = useState(false);
     const [connecting, setConnecting] = useState(false);
     const [balance, setBalance] = useState('0');
+    const hasAutoConnectedRef = useRef(false);
 
     // Connect to a specific wallet (e.g., 'lace', 'nami')
     const connectWallet = useCallback(async (walletName = 'lace') => {
@@ -63,8 +62,12 @@ export const WalletProvider = ({ children }) => {
 
     // Auto-connect on mount
     useEffect(() => {
+        if (hasAutoConnectedRef.current) {
+            return;
+        }
         const lastWallet = localStorage.getItem('connectedWallet');
         if (lastWallet) {
+            hasAutoConnectedRef.current = true;
             connectWallet(lastWallet);
         }
     }, [connectWallet]);
