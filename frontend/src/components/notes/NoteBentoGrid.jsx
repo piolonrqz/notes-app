@@ -42,9 +42,9 @@ const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
             "
             style={{
               background: index % 4 === 0 ? 'linear-gradient(135deg, rgba(110, 140, 251, 0.15) 0%, rgba(99, 108, 203, 0.25) 100%)' :
-                         index % 4 === 1 ? 'linear-gradient(135deg, rgba(99, 108, 203, 0.15) 0%, rgba(80, 88, 156, 0.25) 100%)' :
-                         index % 4 === 2 ? 'linear-gradient(135deg, rgba(80, 88, 156, 0.15) 0%, rgba(60, 70, 123, 0.25) 100%)' :
-                         'linear-gradient(135deg, rgba(60, 70, 123, 0.15) 0%, rgba(110, 140, 251, 0.25) 100%)',
+                          index % 4 === 1 ? 'linear-gradient(135deg, rgba(99, 108, 203, 0.15) 0%, rgba(80, 88, 156, 0.25) 100%)' :
+                          index % 4 === 2 ? 'linear-gradient(135deg, rgba(80, 88, 156, 0.15) 0%, rgba(60, 70, 123, 0.25) 100%)' :
+                          'linear-gradient(135deg, rgba(60, 70, 123, 0.15) 0%, rgba(110, 140, 251, 0.25) 100%)',
               backgroundColor: 'rgba(30, 41, 59, 0.8)',
               backdropFilter: 'blur(10px)'
             }}
@@ -85,8 +85,7 @@ const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
                   </button>
                   <button
                     onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                      e.preventDefault(); e.stopPropagation();
                       if (onDelete) onDelete(note._id);
                     }}
                     className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 shadow-sm transition-all"
@@ -123,10 +122,9 @@ const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
                   </div>
                 )}
               </div>
-
-              {/* Decorative Corner */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-brand-lighter/10 to-transparent rounded-bl-full"></div>
             </div>
+            {/* Decorative Corner */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-brand-lighter/10 to-transparent rounded-bl-full"></div>
           </div>
         );
       })}
@@ -136,4 +134,3 @@ const NoteBentoGrid = ({ notes = [], onDelete, onEdit, onNoteClick }) => {
 };
 
 export default NoteBentoGrid;
-
