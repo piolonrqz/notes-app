@@ -13,12 +13,21 @@ import toast from 'react-hot-toast';
 
 const Home = () => {
   const { wallet, address, connected } = useWallet();
-  const { notes, loading, fetchNotes, deleteNote, updateNote } = useNotes(wallet, address);
+  const { notes, loading, fetchNotes, deleteNote, updateNote, setNotes } = useNotes(wallet, address);
+
+  // Clear notes when wallet disconnects
+  useEffect(() => {
+    if (!connected) {
+      setNotes([]);
+      setSelectedNote(null);
+      setShowNoteDetail(false);
+    }
+  }, [connected, setNotes]);
 
   // --- FIX: Smart Unwrapping of Backend Response ---
   // This looks inside the object to find where the array is hiding
   const realNotes = (() => {
-    if (!notes) return [];
+    if (!connected || !notes) return [];
     if (Array.isArray(notes)) return notes;
     if (notes.data && Array.isArray(notes.data)) return notes.data;
     if (notes.notes && Array.isArray(notes.notes)) return notes.notes; // Common backend pattern
@@ -77,6 +86,10 @@ const Home = () => {
   };
 
   const handleNoteClick = (note) => {
+    if (!connected) {
+      toast.error('Please connect your wallet to view notes');
+      return;
+    }
     setSelectedNote(note);
     setShowNoteDetail(true);
   };
@@ -163,7 +176,7 @@ const Home = () => {
 
         {/* Empty State / Grid */}
         {!isRateLimited && !loading && (
-          filteredNotes.length > 0 ? (
+          connected && filteredNotes.length > 0 ? (
             <NoteBentoGrid
               notes={filteredNotes}
               onDelete={handleDeleteClick}
@@ -198,10 +211,10 @@ const Home = () => {
 
       <NoteDetailSlideOver
         note={selectedNote}
-        isOpen={showNoteDetail}
+        isOpen={showNoteDetail && connected}
         onClose={handleCloseDetail}
         onDelete={handleDeleteFromDetail}
-        onArchive={(noteId) => {
+        onArchive={() => {
           toast.success('Note archived!');
           handleCloseDetail();
         }}
